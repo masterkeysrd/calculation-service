@@ -1,6 +1,18 @@
 # dev/init initialize the go development environment.
 .PHONY: dev/init
-dev/init: gvm/init
+dev/init: gvm/init deps
+
+# deps installs the dependencies.
+.PHONY: deps
+deps:
+	@echo "Installing dependencies..."
+	go mod tidy
+
+# start - starts the server.
+.PHONY: start
+start:
+	@echo "Starting server..."
+	go run ./cmd/server/main.go
 
 # gvm displays the gvm help.
 .PHONY: gvm
