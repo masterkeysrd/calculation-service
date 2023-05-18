@@ -19,3 +19,7 @@
 
 # Go workspace file
 go.work
+
+# Output of build commands
+bin/
+tmp/
