@@ -2,18 +2,18 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/masterkeysrd/calculation-service/internal/auth"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/web/res"
 )
 
 type Server struct {
 	gin            *gin.Engine
-	authController *auth.Controller
+	authController *res.AuthController
 }
 
 func NewServer() *Server {
 	return &Server{
 		gin:            gin.Default(),
-		authController: auth.NewController(),
+		authController: res.NewAuthController(),
 	}
 }
 

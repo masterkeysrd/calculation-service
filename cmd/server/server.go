@@ -8,6 +8,7 @@ import (
 
 func main() {
 	log.Println("Starting Calculation Service...")
+
 	server := server.NewServer()
 	server.RegisterRoutes()
 	server.Start()
