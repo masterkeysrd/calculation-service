@@ -7,6 +7,8 @@
 deps:
 	@echo "Installing dependencies..."
 	go mod tidy
+	go mod download
+	go mod vendor
 
 # start - starts the server.
 .PHONY: start
