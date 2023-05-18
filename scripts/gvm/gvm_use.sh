@@ -1,9 +1,14 @@
 #!/bin/bash
 
-# Install gvm
+echo "Starting gvm use script"
+
+
+# Source gvm script
 echo "Source gvm"
 source $GVM_ROOT/scripts/gvm
 
+# Get root dir
+echo "Initialzing variables"
 ROOT_DIR=$(pwd)/../..
 echo "Root dir: $ROOT_DIR"
 
