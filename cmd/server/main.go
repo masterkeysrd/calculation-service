@@ -1,9 +1,10 @@
 package main
 
 import (
-	"log"
+	"github.com/masterkeysrd/calculation-service/internal/server"
 )
 
 func main() {
-	log.Println("Starting the calculation service")
+	server := server.NewServer()
+	server.Start()
 }
