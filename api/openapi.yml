@@ -4,6 +4,10 @@ info:
   title: Calculation Service API
   description: The Calculation Service API provides a simple interface to a calculation service.
 
+servers:
+  - url: http://localhost:8080
+    description: Local server
+
 tags:
   - name: Authentication
     description: Authentication
@@ -15,30 +19,47 @@ tags:
     description: Records
 
 paths:
-  /api/v1/auth/login:
+  /api/v1/auth/sign-up:
     post:
-      summary: Login User and get a JWT token
-      description: Login User and get a JWT token
-      operationId: login
+      summary: Sign up a new user
+      description: Sign up a new user
+      operationId: auth-v1-sign-up
       tags:
         - Authentication
       requestBody:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/LoginRequest"
+              $ref: "#/components/schemas/SignUpRequest"
+      responses:
+        "200":
+          description: OK
+                
+
+  /api/v1/auth/sign-in:
+    post:
+      summary: Sign in a user and get a JWT token
+      description: Sign in a user and get a JWT token
+      operationId: auth-v1-sign-in
+      tags:
+        - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignInRequest"
       responses:
         "200":
           description: OK
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/LoginResponse"
-  /api/v1/auth/logout:
+                $ref: "#/components/schemas/SignInResponse"
+  /api/v1/auth/sign-out:
     post:
-      summary: Logout User
-      description: Logout User
-      operationId: logout
+      summary: Sign out a user
+      description: Sign out a user
+      operationId: auth-v1-sign-out
       tags:
         - Authentication
       responses:
@@ -57,9 +78,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/LoginResponse"
+                $ref: "#/components/schemas/SignInResponse"
 
-  /api/v1/user/me:
+  /api/v1/users/me:
     get:
       summary: Get current user
       description: Get current user
@@ -140,14 +161,23 @@ paths:
 
 components:
   schemas:
-    LoginRequest:
+    SignUpRequest:
       type: object
       properties:
         username:
           type: string
+          format: email
         password:
           type: string
-    LoginResponse:
+    SignInRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          format: email
+        password:
+          type: string
+    SignInResponse:
       type: object
       properties:
         auth_token:
