@@ -1,0 +1,222 @@
+openapi: 3.0.1
+info:
+  version: 1.0.0
+  title: Calculation Service API
+  description: The Calculation Service API provides a simple interface to a calculation service.
+
+tags:
+  - name: Authentication
+    description: Authentication
+  - name: User
+    description: User
+  - name: Calculation
+    description: Calculation
+  - name: Records
+    description: Records
+
+paths:
+  /api/v1/auth/login:
+    post:
+      summary: Login User and get a JWT token
+      description: Login User and get a JWT token
+      operationId: login
+      tags:
+        - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+  /api/v1/auth/logout:
+    post:
+      summary: Logout User
+      description: Logout User
+      operationId: logout
+      tags:
+        - Authentication
+      responses:
+        "200":
+          description: OK
+  /api/v1/auth/refresh:
+    post:
+      summary: Refresh JWT token
+      description: Refresh JWT token
+      operationId: refresh
+      tags:
+        - Authentication
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+
+  /api/v1/user/me:
+    get:
+      summary: Get current user
+      description: Get current user
+      operationId: getCurrentUser
+      tags:
+        - User
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /api/v1/operations:
+    get:
+      summary: Get all operations
+      description: Get all operations
+      operationId: getAllOperations
+      tags:
+        - Calculation
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  $ref: "#/components/schemas/Operation"
+
+  /api/v1/calculate:
+    post:
+      summary: Perform calculation
+      description: Perform calculation
+      operationId: calculate
+      tags:
+        - Calculation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CalculationRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CalculationResponse"
+
+  /api/v1/records:
+    get:
+      summary: Get all records
+      description: Get all records
+      operationId: getAllRecords
+      tags:
+        - Records
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Record"
+    delete:
+      summary: Delete all records
+      description: Delete all records
+      operationId: deleteAllRecords
+      tags:
+        - Records
+      responses:
+        "200":
+          description: OK
+
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    LoginResponse:
+      type: object
+      properties:
+        auth_token:
+          type: string
+        refresh_token:
+          type: string
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        status:
+          type: string
+        balance:
+          $ref: "#/components/schemas/UserBalance"
+    UserBalance:
+      type: object
+      properties:
+        currentBalance:
+          type: number
+        amountInFlight:
+          type: number
+    Operation:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        description:
+          type: string
+        cost:
+          type: number
+    CalculationRequest:
+      type: object
+      properties:
+        operationId:
+          type: string
+        arguments:
+          type: array
+          items:
+            type: number
+            description: Argument accepts only two numbers
+    CalculationResponse:
+      type: object
+      properties:
+        result:
+          type: string
+        record:
+          $ref: "#/components/schemas/Record"
+    Record:
+      type: object
+      properties:
+        id:
+          type: string
+        operationId:
+          type: string
+        amount:
+          type: number
+        arguments:
+          type: array
+          items:
+            type: number
+        operationResult:
+          type: string
+        date:
+          type: string
+          format: date-time
+        
+        
