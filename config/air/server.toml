@@ -1,12 +1,12 @@
-root = "."
+root = "../../"
 testdata_dir = "testdata"
 tmp_dir = "tmp"
 
 [build]
-  bin = "../../tmp/calculation-service"
-  cmd = "make calculation-service/build_dev"
+  bin = "../../tmp/server"
+  cmd = "make server/build_dev"
   delay = 1000
-  exclude_dir = ["assets", "tmp", "vendor", "testdata"]
+  exclude_dir = ["assets", "tmp", "vendor", "testdata", "scripts", "docs"]
   exclude_file = []
   exclude_regex = ["_test.go"]
   exclude_unchanged = false
