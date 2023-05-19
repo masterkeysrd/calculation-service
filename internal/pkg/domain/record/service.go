@@ -1,19 +1,32 @@
 package record
 
-type RecordService struct{}
+import "errors"
+
+type Service interface {
+	FindByUserID(userID uint64) ([]Record, error)
+	FindByUserIDAndID(userID uint64, id uint64) (Record, error)
+	Create(record Record) error
+	Delete(record Record) error
+}
+
+type recordService struct{}
 
 func NewRecordService() Service {
-	return &RecordService{}
+	return &recordService{}
 }
 
-func (s *RecordService) FindByUserID(userID uint64) ([]Record, error) {
-	return []Record{}, nil
+func (s *recordService) FindByUserID(userID uint64) ([]Record, error) {
+	return []Record{}, errors.New("not implemented")
 }
 
-func (s *RecordService) Create(record Record) error {
-	return nil
+func (s *recordService) FindByUserIDAndID(userID uint64, id uint64) (Record, error) {
+	return Record{}, errors.New("not implemented")
 }
 
-func (s *RecordService) Delete(record Record) error {
-	return nil
+func (s *recordService) Create(record Record) error {
+	return errors.New("not implemented")
+}
+
+func (s *recordService) Delete(record Record) error {
+	return errors.New("not implemented")
 }
