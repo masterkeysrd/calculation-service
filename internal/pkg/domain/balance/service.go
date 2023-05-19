@@ -1,31 +1,31 @@
 package balance
 
-type BalanceService struct{}
+type balanceService struct{}
 
 func NewBalanceService() Service {
-	return &BalanceService{}
+	return &balanceService{}
 }
 
-func (s *BalanceService) FindByUserID(userID uint64) (Balance, error) {
+func (s *balanceService) FindByUserID(userID uint64) (Balance, error) {
 	return Balance{}, nil
 }
 
-func (s *BalanceService) Create(balance Balance) error {
+func (s *balanceService) Create(balance Balance) error {
 	return nil
 }
 
-func (s *BalanceService) Reserve(userID uint64, amount float64) error {
+func (s *balanceService) Reserve(userID uint64, amount float64) error {
 	return nil
 }
 
-func (s *BalanceService) Release(userID uint64, amount float64) error {
+func (s *balanceService) Release(userID uint64, amount float64) error {
 	return nil
 }
 
-func (s *BalanceService) Commit(userID uint64, amount float64) error {
+func (s *balanceService) Commit(userID uint64, amount float64) error {
 	return nil
 }
 
-func (s *BalanceService) Rollback(userID uint64, amount float64) error {
+func (s *balanceService) Rollback(userID uint64, amount float64) error {
 	return nil
 }
