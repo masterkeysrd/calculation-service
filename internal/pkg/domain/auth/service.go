@@ -1,5 +1,7 @@
 package auth
 
+import "errors"
+
 type AuthService struct{}
 
 func NewAuthService() Service {
@@ -11,17 +13,11 @@ func (s *AuthService) SignUp(request SignUpRequest) error {
 }
 
 func (s *AuthService) SignIn(request SignInRequest) (SignInResponse, error) {
-	return SignInResponse{
-		AccessToken:  "access_token",
-		RefreshToken: "refresh_token",
-	}, nil
+	return SignInResponse{}, errors.New("not implemented")
 }
 
 func (s *AuthService) Refresh(request RefreshRequest) (SignInResponse, error) {
-	return SignInResponse{
-		AccessToken:  "access_token",
-		RefreshToken: "refresh_token",
-	}, nil
+	return SignInResponse{}, nil
 }
 
 func (s *AuthService) SignOut(request SignOutRequest) error {
