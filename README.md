@@ -34,7 +34,7 @@ You will need:
 - Go - for compiling Go files. For help installing Go please follow the instructions available on <https://go.dev/doc/install>
 - GVM - for managing Go versions. For help installing GVM please follow the instruction available on <https://go.dev/doc/install>
 - Git - for version management. Download from here <https://git-scm.com/downloads> (MacOS users can also use Brew and Linux users can use the built-in package manager, eg apt, yum, etc).
-- Make -
+- Make - for running the Makefile. Download from here <https://www.gnu.org/software/make/> (MacOS users can also use Brew and Linux users can use the built-in package manager, eg apt, yum, etc).
 
 ### Steps to setup the local environment
 
@@ -50,10 +50,10 @@ git clone https://github.com/masterkeysrd/calculation-service.git
 cd calculation-service
 ```
 
-- Initialize the Go Version, Packages and other dependencies
+- Initialize the Go Version, Packages, other dependencies and start the service in development mode.
 
 ```bash
-make dev/init
+make start_dev
 ```
 
 ## API Documentation

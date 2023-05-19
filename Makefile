@@ -18,6 +18,19 @@ start: deps server/start
 .PHONY: start_dev
 start_dev: dev/all server/start_dev
 
+# test - runs the tests.
+.PHONY: test
+test:
+	@echo "Running tests..."
+	go test -v ./... 
+
+# test - runs the tests.
+.PHONY: test_coverage
+test_coverage:
+	@echo "Running tests..."
+	go test -v -cover ./... -coverprofile=coverage.out
+	go tool cover -html=coverage.out -o coverage.html
+
 # help - prints the help message.
 .PHONY: help
 help:

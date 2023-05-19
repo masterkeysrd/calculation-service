@@ -2,7 +2,10 @@ module github.com/masterkeysrd/calculation-service
 
 go 1.20
 
-require github.com/gin-gonic/gin v1.9.0
+require (
+	github.com/gin-gonic/gin v1.9.0
+	golang.org/x/tools/cmd/cover v0.1.0-deprecated
+)
 
 require (
 	github.com/bytedance/sonic v1.8.0 // indirect
@@ -26,6 +29,7 @@ require (
 	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
+	golang.org/x/tools v0.5.1-0.20230111220935-a7f7db3f17fc // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
