@@ -52,3 +52,8 @@ func (b *Balance) Confirm(amount float64) error {
 	b.InFlight -= amount
 	return nil
 }
+
+func (b *Balance) Rollback(amount float64) error {
+	b.Amount += amount
+	return nil
+}

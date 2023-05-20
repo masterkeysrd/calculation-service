@@ -8,6 +8,7 @@ type Service interface {
 	Reserve(request BalanceTransactionRequest) (*BalanceGetResponse, error)
 	Release(request BalanceTransactionRequest) (*BalanceGetResponse, error)
 	Commit(request BalanceTransactionRequest) (*BalanceGetResponse, error)
+	Rollback(request BalanceTransactionRequest) (*BalanceGetResponse, error)
 }
 
 type BalanceGetResponse struct {
@@ -108,6 +109,29 @@ func (s *balanceService) Commit(request BalanceTransactionRequest) (*BalanceGetR
 	}
 
 	err = balance.Confirm(request.Amount)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.repository.Update(balance)
+	if err != nil {
+		return nil, err
+	}
+
+	return &BalanceGetResponse{
+		Amount:         balance.Amount,
+		InFlightAmount: balance.InFlight,
+	}, nil
+}
+
+func (s *balanceService) Rollback(request BalanceTransactionRequest) (*BalanceGetResponse, error) {
+	balance, err := s.repository.FindByUserID(request.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	err = balance.Rollback(request.Amount)
 
 	if err != nil {
 		return nil, err
