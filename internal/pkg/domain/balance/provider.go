@@ -2,7 +2,7 @@ package balance
 
 import "go.uber.org/dig"
 
-func Provide(container *dig.Container) error {
+func RegisterProviders(container *dig.Container) error {
 	if err := container.Provide(NewRepository); err != nil {
 		return err
 	}
