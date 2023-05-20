@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"strconv"
+
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/user"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/jwt"
 	"go.uber.org/dig"
@@ -41,13 +43,13 @@ func (s *authService) SignUp(request SignUpRequest) error {
 }
 
 func (s *authService) SignIn(request SignInRequest) (*SignInResponse, error) {
-	_, err := s.userService.VerifyCredentials(request.UserName, request.Password)
+	user, err := s.userService.VerifyCredentials(request.UserName, request.Password)
 
 	if err != nil {
 		return nil, err
 	}
 
-	tokens, err := s.jwtService.GenerateTokens(request.UserName)
+	tokens, err := s.jwtService.GenerateTokens(strconv.FormatUint(user.ID, 10))
 	if err != nil {
 		return nil, err
 	}

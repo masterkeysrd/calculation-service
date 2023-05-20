@@ -1,13 +1,13 @@
 package auth
 
 type SignUpRequest struct {
-	UserName string `json:"username" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=8,max=32"`
+	UserName string `json:"username" form:"username" validate:"required,email"`
+	Password string `json:"password" form:"password" validate:"required,min=8,max=32"`
 }
 
 type SignInRequest struct {
-	UserName string `json:"username" binding:"required" validate:"required"`
-	Password string `json:"password" binding:"required"`
+	UserName string `json:"username" form:"username" binding:"required" validate:"required"`
+	Password string `json:"password" form:"password" binding:"required"`
 }
 
 type SignInResponse struct {
