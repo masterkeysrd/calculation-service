@@ -1,30 +1,51 @@
 package auth
 
-import "errors"
+import (
+	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/user"
+)
 
 type Service interface {
 	SignUp(request SignUpRequest) error
-	SignIn(request SignInRequest) (SignInResponse, error)
-	Refresh(request RefreshRequest) (SignInResponse, error)
+	SignIn(request SignInRequest) (*SignInResponse, error)
+	Refresh(request RefreshRequest) (*SignInResponse, error)
 	SignOut(request SignOutRequest) error
 }
 
-type authService struct{}
+type authService struct {
+	userService user.Service
+}
 
-func NewAuthService() Service {
-	return &authService{}
+type NewAuthServiceOptions struct {
+	UserService user.Service
+}
+
+func NewAuthService(options NewAuthServiceOptions) Service {
+	return &authService{
+		userService: options.UserService,
+	}
 }
 
 func (s *authService) SignUp(request SignUpRequest) error {
-	return nil
+	err := s.userService.Create(user.CreateUserRequest{
+		UserName: request.UserName,
+		Password: request.Password,
+	})
+
+	return err
 }
 
-func (s *authService) SignIn(request SignInRequest) (SignInResponse, error) {
-	return SignInResponse{}, errors.New("not implemented")
+func (s *authService) SignIn(request SignInRequest) (*SignInResponse, error) {
+	_, err := s.userService.VerifyCredentials(request.UserName, request.Password)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &SignInResponse{}, nil
 }
 
-func (s *authService) Refresh(request RefreshRequest) (SignInResponse, error) {
-	return SignInResponse{}, nil
+func (s *authService) Refresh(request RefreshRequest) (*SignInResponse, error) {
+	return nil, nil
 }
 
 func (s *authService) SignOut(request SignOutRequest) error {
