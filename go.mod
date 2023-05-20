@@ -8,6 +8,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.1
 	github.com/go-playground/validator/v10 v10.13.0
 	github.com/stretchr/testify v1.8.2
+	go.uber.org/dig v1.17.0
 	golang.org/x/tools/cmd/cover v0.1.0-deprecated
 )
 
