@@ -8,6 +8,7 @@ import (
 	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/jwt"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/validator"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/web/res"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/web/res/middleware"
 	"github.com/masterkeysrd/calculation-service/internal/server"
 	"go.uber.org/dig"
 )
@@ -42,6 +43,7 @@ func buildContainer() *dig.Container {
 
 	container.Provide(res.NewAuthController)
 	container.Provide(res.NewUserController)
+	container.Provide(middleware.JWTAuthMiddlewareFactory)
 
 	container.Provide(user.NewFakeUserRepository)
 
