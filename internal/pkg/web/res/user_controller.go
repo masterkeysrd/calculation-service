@@ -41,7 +41,9 @@ func (c *UserController) FindMe(ctx *gin.Context) {
 }
 
 func (c *UserController) DeleteMe(ctx *gin.Context) {
-	err := c.service.Delete("admin@test.com")
+	err := c.service.Delete(user.DeleteUserRequest{
+		UserName: "admin@test.com",
+	})
 
 	if err != nil {
 		ctx.JSON(400, gin.H{
