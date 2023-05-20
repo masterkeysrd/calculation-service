@@ -2,7 +2,6 @@ package user
 
 import (
 	"errors"
-	"time"
 )
 
 type Repository interface {
@@ -23,11 +22,9 @@ func NewFakeUserRepository() Repository {
 		counter: 1,
 		users: []*User{
 			{
-				ID:        1,
-				UserName:  "admin@test.com",
-				Password:  "admin",
-				CreatedAt: time.Now(),
-				UpdatedAt: time.Now(),
+				ID:       1,
+				UserName: "admin@test.com",
+				Password: "admin",
 			},
 		},
 	}
@@ -56,8 +53,6 @@ func (r *FakeUserRepository) FindByUserName(userName string) (*User, error) {
 func (r *FakeUserRepository) Create(user *User) error {
 	r.counter++
 	user.ID = r.counter
-	user.CreatedAt = time.Now()
-	user.UpdatedAt = time.Now()
 	r.users = append(r.users, user)
 
 	return nil
@@ -66,7 +61,6 @@ func (r *FakeUserRepository) Create(user *User) error {
 func (r *FakeUserRepository) Update(user *User) error {
 	for i, u := range r.users {
 		if u.ID == user.ID {
-			r.users[i].UpdatedAt = time.Now()
 			r.users[i] = user
 		}
 	}
