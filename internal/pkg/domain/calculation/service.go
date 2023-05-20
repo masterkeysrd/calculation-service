@@ -1,11 +1,11 @@
 package calculation
 
 import (
-	"errors"
 	"time"
 
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/balance"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/operation"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/record"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/user"
 	"go.uber.org/dig"
 )
@@ -30,22 +30,25 @@ type CalculateResponse struct {
 
 type ServiceParams struct {
 	dig.In
-	OperationService operation.Service
 	UserService      user.Service
+	RecordService    record.Service
 	BalanceService   balance.Service
+	OperationService operation.Service
 }
 
 type service struct {
-	operationService operation.Service
 	userService      user.Service
+	recordService    record.Service
 	balanceService   balance.Service
+	operationService operation.Service
 }
 
 func NewService(params ServiceParams) Service {
 	return &service{
 		userService:      params.UserService,
-		operationService: params.OperationService,
+		recordService:    params.RecordService,
 		balanceService:   params.BalanceService,
+		operationService: params.OperationService,
 	}
 }
 
@@ -72,33 +75,35 @@ func (s *service) Calculate(request CalculateRequest) (*CalculateResponse, error
 		return nil, err
 	}
 
+	if err != nil {
+		s.balanceService.Release(transaction)
+		return nil, err
+	}
+
 	balance, err := s.balanceService.Commit(transaction)
 	if err != nil {
 		s.balanceService.Release(transaction)
 		return nil, err
 	}
 
+	record, err := s.recordService.Create(record.CreateRecordRequest{
+		UserID:      request.UserID,
+		OperationID: request.OperationId,
+		Amount:      operation.Cost,
+		UserBalance: balance.Amount,
+	})
+
+	if err != nil {
+		s.balanceService.Rollback(transaction)
+		return nil, err
+	}
+
 	return &CalculateResponse{
-		RecordID:    0,
+		RecordID:    record.ID,
 		Amount:      operation.Cost,
 		UserBalance: balance.Amount,
 		Result:      result,
-		Date:        time.Now(),
+		Date:        record.CreatedAt,
 	}, nil
 
-}
-
-func performOperation(operationType operation.OperationType, arguments []string) (string, error) {
-	switch operationType {
-	case operation.OperationTypeAddition:
-		return addition(arguments)
-	case operation.OperationTypeSubtraction:
-		return subtraction(arguments)
-	case operation.OperationTypeMultiplication:
-		return multiplication(arguments)
-	case operation.OperationTypeDivision:
-		return division(arguments)
-	default:
-		return "", errors.New("operation not supported")
-	}
 }
