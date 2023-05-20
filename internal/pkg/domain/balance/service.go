@@ -1,40 +1,125 @@
 package balance
 
+import "go.uber.org/dig"
+
 type Service interface {
-	FindByUserID(userID uint64) (Balance, error)
-	Create(balance Balance) error
-	Reserve(userID uint64, amount float64) error
-	Release(userID uint64, amount float64) error
-	Commit(userID uint64, amount float64) error
-	Rollback(userID uint64, amount float64) error
+	FindByUserID(userID uint64) (*BalanceGetResponse, error)
+	Create(request CreateBalanceRequest) error
+	Reserve(request BalanceTransactionRequest) (*BalanceGetResponse, error)
+	Release(request BalanceTransactionRequest) (*BalanceGetResponse, error)
+	Commit(request BalanceTransactionRequest) (*BalanceGetResponse, error)
 }
 
-type balanceService struct{}
-
-func NewBalanceService() Service {
-	return &balanceService{}
+type BalanceGetResponse struct {
+	Amount         float64 `json:"amount"`
+	InFlightAmount float64 `json:"inFlightAmount"`
 }
 
-func (s *balanceService) FindByUserID(userID uint64) (Balance, error) {
-	return Balance{}, nil
+type CreateBalanceRequest struct {
+	UserID uint64  `json:"userId"`
+	Amount float64 `json:"amount"`
 }
 
-func (s *balanceService) Create(balance Balance) error {
-	return nil
+type BalanceTransactionRequest struct {
+	UserID uint64  `json:"userId"`
+	Amount float64 `json:"amount"`
 }
 
-func (s *balanceService) Reserve(userID uint64, amount float64) error {
-	return nil
+type balanceService struct {
+	repository Repository
 }
 
-func (s *balanceService) Release(userID uint64, amount float64) error {
-	return nil
+type ServiceParams struct {
+	dig.In
+	Repository Repository
 }
 
-func (s *balanceService) Commit(userID uint64, amount float64) error {
-	return nil
+func NewService(params ServiceParams) Service {
+	return &balanceService{
+		repository: params.Repository,
+	}
 }
 
-func (s *balanceService) Rollback(userID uint64, amount float64) error {
-	return nil
+func (s *balanceService) FindByUserID(userID uint64) (*BalanceGetResponse, error) {
+	balance, err := s.repository.FindByUserID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &BalanceGetResponse{
+		Amount:         balance.Amount,
+		InFlightAmount: balance.InFlight,
+	}, nil
+}
+
+func (s *balanceService) Create(request CreateBalanceRequest) error {
+	balance := NewBalance(NewBalanceInput(request))
+	return s.repository.Create(balance)
+}
+
+func (s *balanceService) Reserve(request BalanceTransactionRequest) (*BalanceGetResponse, error) {
+	balance, err := s.repository.FindByUserID(request.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	err = balance.Reserve(request.Amount)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.repository.Update(balance)
+	if err != nil {
+		return nil, err
+	}
+
+	return &BalanceGetResponse{
+		Amount:         balance.Amount,
+		InFlightAmount: balance.InFlight,
+	}, nil
+}
+
+func (s *balanceService) Release(request BalanceTransactionRequest) (*BalanceGetResponse, error) {
+	balance, err := s.repository.FindByUserID(request.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	err = balance.Release(request.Amount)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.repository.Update(balance)
+	if err != nil {
+		return nil, err
+	}
+
+	return &BalanceGetResponse{
+		Amount:         balance.Amount,
+		InFlightAmount: balance.InFlight,
+	}, nil
+}
+
+func (s *balanceService) Commit(request BalanceTransactionRequest) (*BalanceGetResponse, error) {
+	balance, err := s.repository.FindByUserID(request.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	err = balance.Confirm(request.Amount)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.repository.Update(balance)
+	if err != nil {
+		return nil, err
+	}
+
+	return &BalanceGetResponse{
+		Amount:         balance.Amount,
+		InFlightAmount: balance.InFlight,
+	}, nil
 }
