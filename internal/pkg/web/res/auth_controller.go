@@ -13,9 +13,13 @@ type AuthController struct {
 
 type SignOutHeader = auth.SignOutRequest
 
-func NewAuthController() *AuthController {
+type NewAuthControllerOptions struct {
+	Service auth.Service
+}
+
+func NewAuthController(options NewAuthControllerOptions) *AuthController {
 	return &AuthController{
-		service: auth.NewAuthService(),
+		service: options.Service,
 	}
 }
 

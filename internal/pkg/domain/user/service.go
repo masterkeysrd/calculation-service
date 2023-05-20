@@ -1,13 +1,12 @@
 package user
 
-import (
-	"errors"
-	"fmt"
-)
-
 type CreateUserRequest struct {
 	UserName string `json:"username" validate:"required,email"`
 	Password string `json:"password" validate:"required,min=8,max=32"`
+}
+
+type DeleteUserRequest struct {
+	UserName string `json:"username" validate:"required,email"`
 }
 
 type FindUserResponse struct {
@@ -17,8 +16,8 @@ type FindUserResponse struct {
 
 type Service interface {
 	FindByUserName(username string) (*FindUserResponse, error)
-	Create(user CreateUserRequest) error
-	Delete(username string) error
+	Create(request CreateUserRequest) error
+	Delete(request DeleteUserRequest) error
 }
 
 type userService struct {
@@ -39,6 +38,10 @@ func NewUserService(options UserServiceOptions) Service {
 }
 
 func (s userService) FindByUserName(userName string) (*FindUserResponse, error) {
+	if userName == "" {
+		return nil, ErrUserNameRequired
+	}
+
 	user, err := s.repository.FindByUserName(userName)
 
 	if err != nil {
@@ -46,8 +49,7 @@ func (s userService) FindByUserName(userName string) (*FindUserResponse, error) 
 	}
 
 	if user == nil || user.ID == 0 {
-		// TODO: Create a custom error
-		return nil, errors.New("user not found")
+		return nil, ErrUserNotFound
 	}
 
 	return &FindUserResponse{
@@ -57,7 +59,10 @@ func (s userService) FindByUserName(userName string) (*FindUserResponse, error) 
 }
 
 func (s userService) Create(request CreateUserRequest) error {
-	fmt.Println("userService.Create", request)
+	if user, _ := s.repository.FindByUserName(request.UserName); user != nil {
+		return ErrUserAlreadyExists
+	}
+
 	user, err := s.createUserFactory(request.UserName, request.Password)
 
 	if err != nil {
@@ -69,19 +74,19 @@ func (s userService) Create(request CreateUserRequest) error {
 	return nil
 }
 
-func (s userService) Delete(username string) error {
-	if username == "" {
-		return errors.New("username is required")
+func (s userService) Delete(request DeleteUserRequest) error {
+	if request.UserName == "" {
+		return ErrUserNameRequired
 	}
 
-	user, err := s.repository.FindByUserName(username)
+	user, err := s.repository.FindByUserName(request.UserName)
 
 	if err != nil {
 		return err
 	}
 
 	if user == nil || user.ID == 0 {
-		return errors.New("user not found")
+		return ErrUserNotFound
 	}
 
 	return s.repository.Delete(user)
