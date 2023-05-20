@@ -8,7 +8,7 @@ type CreateUserRequest struct {
 }
 
 type DeleteUserRequest struct {
-	UserName string `json:"username" validate:"required,email"`
+	UserID uint64 `json:"username" validate:"required,email"`
 }
 
 type FindUserResponse struct {
@@ -17,7 +17,8 @@ type FindUserResponse struct {
 }
 
 type Service interface {
-	FindByUserName(username string) (*FindUserResponse, error)
+	Get(id uint64) (*FindUserResponse, error)
+	GetByUserName(username string) (*FindUserResponse, error)
 	Create(request CreateUserRequest) error
 	Delete(request DeleteUserRequest) error
 	VerifyCredentials(username string, password string) (*FindUserResponse, error)
@@ -41,7 +42,24 @@ func NewUserService(options UserServiceParams) Service {
 	}
 }
 
-func (s userService) FindByUserName(userName string) (*FindUserResponse, error) {
+func (s userService) Get(id uint64) (*FindUserResponse, error) {
+	user, err := s.repository.FindByID(id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if user == nil || user.ID == 0 {
+		return nil, ErrUserNotFound
+	}
+
+	return &FindUserResponse{
+		ID:       user.ID,
+		UserName: user.UserName,
+	}, nil
+}
+
+func (s userService) GetByUserName(userName string) (*FindUserResponse, error) {
 	if userName == "" {
 		return nil, ErrUserNameRequired
 	}
@@ -79,11 +97,11 @@ func (s userService) Create(request CreateUserRequest) error {
 }
 
 func (s userService) Delete(request DeleteUserRequest) error {
-	if request.UserName == "" {
+	if request.UserID == 0 {
 		return ErrUserNameRequired
 	}
 
-	user, err := s.repository.FindByUserName(request.UserName)
+	user, err := s.repository.FindByID(request.UserID)
 
 	if err != nil {
 		return err
