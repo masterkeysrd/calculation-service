@@ -1,35 +1,65 @@
 package operation
 
+import "go.uber.org/dig"
+
+type OperationResponse struct {
+	ID   uint64  `json:"id"`
+	Type string  `json:"type"`
+	Cost float64 `json:"cost"`
+}
+type ListOperationsResponse struct {
+	Data []OperationResponse `json:"data"`
+}
+
 type Service interface {
-	FindAll() ([]Operation, error)
-	FindByName(name string) (Operation, error)
-	Create(operation Operation) error
-	Update(operation Operation) error
-	Delete(operation Operation) error
+	Get(id uint64) (*OperationResponse, error)
+	List() (*ListOperationsResponse, error)
 }
 
-type operationService struct{}
-
-func NewOperationService() Service {
-	return &operationService{}
+type OperationServiceParams struct {
+	dig.In
+	Repository Repository
 }
 
-func (s *operationService) FindAll() ([]Operation, error) {
-	return nil, nil
+type service struct {
+	repository Repository
 }
 
-func (s *operationService) FindByName(name string) (Operation, error) {
-	return Operation{}, nil
+func NewOperationService(params OperationServiceParams) Service {
+	return &service{
+		repository: params.Repository,
+	}
 }
 
-func (s *operationService) Create(operation Operation) error {
-	return nil
+func (s *service) Get(id uint64) (*OperationResponse, error) {
+	operation, err := s.repository.FindByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &OperationResponse{
+		ID:   operation.ID,
+		Type: string(operation.Type),
+		Cost: operation.Cost,
+	}, nil
 }
 
-func (s *operationService) Update(operation Operation) error {
-	return nil
-}
+func (s *service) List() (*ListOperationsResponse, error) {
+	operations, err := s.repository.FindAll()
+	if err != nil {
+		return nil, err
+	}
 
-func (s *operationService) Delete(operation Operation) error {
-	return nil
+	var operationsResponse []OperationResponse
+	for _, operation := range operations {
+		operationsResponse = append(operationsResponse, OperationResponse{
+			ID:   operation.ID,
+			Type: string(operation.Type),
+			Cost: operation.Cost,
+		})
+	}
+
+	return &ListOperationsResponse{
+		Data: operationsResponse,
+	}, nil
 }
