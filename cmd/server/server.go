@@ -7,40 +7,42 @@ import (
 	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/validator"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/web/res"
 	"github.com/masterkeysrd/calculation-service/internal/server"
+	"go.uber.org/dig"
 )
 
 func main() {
-	server := buildServer()
-	server.RegisterRoutes()
-	server.Start()
+	container := buildContainer()
+
+	_ = container.Invoke(func(v *validator.Validator) {
+		v.RegisterDefaultTranslations()
+	})
+
+	err := container.Invoke(func(server *server.Server) {
+		server.Start()
+	})
+
+	if err != nil {
+		panic(err)
+	}
 }
 
-func buildServer() *server.Server {
-	validator := validator.NewValidator()
-	validator.RegisterDefaultTranslations()
+func buildContainer() *dig.Container {
+	container := dig.New()
+	container.Provide(gin.Default())
 
-	userFactory := user.NewUserFactory(validator)
-	userRepository := user.NewFakeUserRepository()
-	userService := user.NewUserService(user.UserServiceOptions{
-		CreateUserFactory: userFactory,
-		Repository:        userRepository,
-	})
+	container.Provide(validator.NewValidator)
 
-	authService := auth.NewAuthService(auth.NewAuthServiceOptions{
-		UserService: userService,
-	})
+	container.Provide(server.NewServer)
 
-	authController := res.NewAuthController(res.NewAuthControllerOptions{
-		Service: authService,
-	})
+	container.Provide(res.NewAuthController)
+	container.Provide(res.NewUserController)
 
-	userController := res.NewUserController(res.UserControllerOptions{
-		Service: userService,
-	})
+	container.Provide(user.NewFakeUserRepository)
 
-	return server.NewServer(server.ServerOptions{
-		Gin:            gin.Default(),
-		AuthController: authController,
-		UserController: userController,
-	})
+	container.Provide(auth.NewAuthService)
+
+	container.Provide(user.NewUserFactory)
+	container.Provide(user.NewUserService)
+
+	return container
 }

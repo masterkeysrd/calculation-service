@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/auth"
+	"go.uber.org/dig"
 )
 
 type AuthController struct {
@@ -13,11 +14,12 @@ type AuthController struct {
 
 type SignOutHeader = auth.SignOutRequest
 
-type NewAuthControllerOptions struct {
+type AuthControllerParams struct {
+	dig.In
 	Service auth.Service
 }
 
-func NewAuthController(options NewAuthControllerOptions) *AuthController {
+func NewAuthController(options AuthControllerParams) *AuthController {
 	return &AuthController{
 		service: options.Service,
 	}

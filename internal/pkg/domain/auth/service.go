@@ -2,6 +2,7 @@ package auth
 
 import (
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/user"
+	"go.uber.org/dig"
 )
 
 type Service interface {
@@ -15,11 +16,12 @@ type authService struct {
 	userService user.Service
 }
 
-type NewAuthServiceOptions struct {
+type AuthServiceParams struct {
+	dig.In
 	UserService user.Service
 }
 
-func NewAuthService(options NewAuthServiceOptions) Service {
+func NewAuthService(options AuthServiceParams) Service {
 	return &authService{
 		userService: options.UserService,
 	}

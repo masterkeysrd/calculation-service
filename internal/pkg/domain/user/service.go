@@ -1,5 +1,7 @@
 package user
 
+import "go.uber.org/dig"
+
 type CreateUserRequest struct {
 	UserName string `json:"username" validate:"required,email"`
 	Password string `json:"password" validate:"required,min=8,max=32"`
@@ -26,12 +28,13 @@ type userService struct {
 	createUserFactory UserFactory
 }
 
-type UserServiceOptions struct {
+type UserServiceParams struct {
+	dig.In
 	Repository        Repository
 	CreateUserFactory UserFactory
 }
 
-func NewUserService(options UserServiceOptions) Service {
+func NewUserService(options UserServiceParams) Service {
 	return &userService{
 		createUserFactory: options.CreateUserFactory,
 		repository:        options.Repository,

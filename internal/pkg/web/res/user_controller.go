@@ -5,17 +5,19 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/user"
+	"go.uber.org/dig"
 )
 
 type UserController struct {
 	service user.Service
 }
 
-type UserControllerOptions struct {
+type UserControllerParams struct {
+	dig.In
 	Service user.Service
 }
 
-func NewUserController(options UserControllerOptions) *UserController {
+func NewUserController(options UserControllerParams) *UserController {
 	return &UserController{
 		service: options.Service,
 	}
