@@ -1,7 +1,8 @@
 package jwt
 
 import (
-	"fmt"
+	"errors"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -123,13 +124,18 @@ func (s *service) ValidateToken(c *gin.Context) error {
 		return err
 	}
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		fmt.Println("ValidateToken: claims: ", claims)
-		c.Set("tokenId", claims["jti"])
-		c.Set("username", claims["sub"])
-
-		return nil
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return ErrorInvalidToken
 	}
 
-	return ErrorInvalidToken
+	userId, err := strconv.ParseUint(claims["sub"].(string), 10, 64)
+	if err != nil {
+		return errors.New("invalid user id")
+	}
+
+	c.Set("tokenId", claims["jti"])
+	c.Set("userId", userId)
+
+	return nil
 }
