@@ -2,6 +2,7 @@ package auth
 
 import (
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/user"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/jwt"
 	"go.uber.org/dig"
 )
 
@@ -14,15 +15,18 @@ type Service interface {
 
 type authService struct {
 	userService user.Service
+	jwtService  jwt.Service
 }
 
 type AuthServiceParams struct {
 	dig.In
+	JWTService  jwt.Service
 	UserService user.Service
 }
 
 func NewAuthService(options AuthServiceParams) Service {
 	return &authService{
+		jwtService:  options.JWTService,
 		userService: options.UserService,
 	}
 }
@@ -43,7 +47,15 @@ func (s *authService) SignIn(request SignInRequest) (*SignInResponse, error) {
 		return nil, err
 	}
 
-	return &SignInResponse{}, nil
+	tokens, err := s.jwtService.GenerateTokens(request.UserName)
+	if err != nil {
+		return nil, err
+	}
+
+	return &SignInResponse{
+		AccessToken:  tokens.AccessToken,
+		RefreshToken: tokens.RefreshToken,
+	}, nil
 }
 
 func (s *authService) Refresh(request RefreshRequest) (*SignInResponse, error) {

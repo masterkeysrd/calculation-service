@@ -4,6 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/auth"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/user"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/config"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/jwt"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/validator"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/web/res"
 	"github.com/masterkeysrd/calculation-service/internal/server"
@@ -11,6 +13,8 @@ import (
 )
 
 func main() {
+	config.LoadConfig()
+
 	container := buildContainer()
 
 	_ = container.Invoke(func(v *validator.Validator) {
@@ -29,6 +33,8 @@ func main() {
 func buildContainer() *dig.Container {
 	container := dig.New()
 	container.Provide(gin.Default())
+	container.Provide(config.GetConfig)
+	container.Provide(config.GetJWTConfig)
 
 	container.Provide(validator.NewValidator)
 
@@ -38,6 +44,8 @@ func buildContainer() *dig.Container {
 	container.Provide(res.NewUserController)
 
 	container.Provide(user.NewFakeUserRepository)
+
+	container.Provide(jwt.NewJwtService)
 
 	container.Provide(auth.NewAuthService)
 
