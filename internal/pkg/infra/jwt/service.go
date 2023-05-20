@@ -1,8 +1,10 @@
 package jwt
 
 import (
+	"fmt"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"go.uber.org/dig"
@@ -19,6 +21,7 @@ type Tokens struct {
 
 type Service interface {
 	GenerateTokens(userId string) (*Tokens, error)
+	ValidateToken(c *gin.Context) error
 }
 
 type ServiceParams struct {
@@ -99,4 +102,34 @@ func (s *service) getAccessTokenTTL() time.Duration {
 
 func (s *service) getRefreshTokenTTL() time.Duration {
 	return time.Duration(s.config.RefreshTokenTTL) * time.Second
+}
+
+func (s *service) ValidateToken(c *gin.Context) error {
+	tokenString := ExtractToken(c)
+
+	if len(tokenString) == 0 {
+		return ErrTokenIsNotProvided
+	}
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, ErrUnexpectedSigningMethod
+		}
+
+		return []byte(s.config.SecretKey), nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		fmt.Println("ValidateToken: claims: ", claims)
+		c.Set("tokenId", claims["jti"])
+		c.Set("username", claims["sub"])
+
+		return nil
+	}
+
+	return ErrorInvalidToken
 }
