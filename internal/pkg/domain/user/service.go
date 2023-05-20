@@ -18,6 +18,7 @@ type Service interface {
 	FindByUserName(username string) (*FindUserResponse, error)
 	Create(request CreateUserRequest) error
 	Delete(request DeleteUserRequest) error
+	VerifyCredentials(username string, password string) (*FindUserResponse, error)
 }
 
 type userService struct {
@@ -90,4 +91,25 @@ func (s userService) Delete(request DeleteUserRequest) error {
 	}
 
 	return s.repository.Delete(user)
+}
+
+func (s userService) VerifyCredentials(username string, password string) (*FindUserResponse, error) {
+	user, err := s.repository.FindByUserName(username)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if user == nil || user.ID == 0 {
+		return nil, ErrInvalidCredentials
+	}
+
+	if err := user.ComparePassword(password); err != nil {
+		return nil, err
+	}
+
+	return &FindUserResponse{
+		ID:       user.ID,
+		UserName: user.UserName,
+	}, nil
 }
