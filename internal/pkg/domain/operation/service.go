@@ -3,9 +3,9 @@ package operation
 import "go.uber.org/dig"
 
 type OperationResponse struct {
-	ID   uint64  `json:"id"`
-	Type string  `json:"type"`
-	Cost float64 `json:"cost"`
+	ID   uint64        `json:"id"`
+	Type OperationType `json:"type"`
+	Cost float64       `json:"cost"`
 }
 type ListOperationsResponse struct {
 	Data []OperationResponse `json:"data"`
@@ -39,7 +39,7 @@ func (s *service) Get(id uint64) (*OperationResponse, error) {
 
 	return &OperationResponse{
 		ID:   operation.ID,
-		Type: string(operation.Type),
+		Type: operation.Type,
 		Cost: operation.Cost,
 	}, nil
 }
@@ -52,11 +52,7 @@ func (s *service) List() (*ListOperationsResponse, error) {
 
 	var operationsResponse []OperationResponse
 	for _, operation := range operations {
-		operationsResponse = append(operationsResponse, OperationResponse{
-			ID:   operation.ID,
-			Type: string(operation.Type),
-			Cost: operation.Cost,
-		})
+		operationsResponse = append(operationsResponse, OperationResponse(operation))
 	}
 
 	return &ListOperationsResponse{
