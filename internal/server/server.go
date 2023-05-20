@@ -8,12 +8,20 @@ import (
 type Server struct {
 	gin            *gin.Engine
 	authController *res.AuthController
+	userController *res.UserController
 }
 
-func NewServer() *Server {
+type ServerOptions struct {
+	Gin            *gin.Engine
+	AuthController *res.AuthController
+	UserController *res.UserController
+}
+
+func NewServer(options ServerOptions) *Server {
 	return &Server{
-		gin:            gin.Default(),
-		authController: res.NewAuthController(),
+		gin:            options.Gin,
+		authController: options.AuthController,
+		userController: options.UserController,
 	}
 }
 
@@ -22,8 +30,9 @@ func (s *Server) RegisterRoutes() {
 	v1 := api.Group("/v1")
 
 	s.authController.RegisterRoutes(v1.Group("/auth"))
+	s.userController.RegisterRoutes(v1.Group("/users"))
 }
 
 func (s *Server) Start() error {
-	return s.gin.Run()
+	return s.gin.Run(":8080")
 }
