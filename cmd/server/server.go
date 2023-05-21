@@ -1,13 +1,16 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/auth"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/balance"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/calculation"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/operation"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/record"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/user"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/config"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/jwt"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/validator"
-	"github.com/masterkeysrd/calculation-service/internal/pkg/web/res"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/web/res/controllers"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/web/res/middleware"
 	"github.com/masterkeysrd/calculation-service/internal/server"
 	"go.uber.org/dig"
@@ -33,26 +36,19 @@ func main() {
 
 func buildContainer() *dig.Container {
 	container := dig.New()
-	container.Provide(gin.Default())
-	container.Provide(config.GetConfig)
-	container.Provide(config.GetJWTConfig)
 
-	container.Provide(validator.NewValidator)
-
-	container.Provide(server.NewServer)
-
-	container.Provide(res.NewAuthController)
-	container.Provide(res.NewUserController)
-	container.Provide(middleware.JWTAuthMiddlewareFactory)
-
-	container.Provide(user.NewFakeUserRepository)
-
-	container.Provide(jwt.NewJwtService)
-
-	container.Provide(auth.NewAuthService)
-
-	container.Provide(user.NewUserFactory)
-	container.Provide(user.NewUserService)
+	jwt.RegisterProviders(container)
+	auth.RegisterProviders(container)
+	user.RegisterProviders(container)
+	config.RegisterProviders(container)
+	record.RegisterProviders(container)
+	server.RegisterProviders(container)
+	balance.RegisterProviders(container)
+	operation.RegisterProviders(container)
+	validator.RegisterProviders(container)
+	middleware.RegisterProviders(container)
+	calculation.RegisterProviders(container)
+	controllers.RegisterProviders(container)
 
 	return container
 }
