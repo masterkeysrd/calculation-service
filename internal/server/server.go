@@ -2,28 +2,39 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/masterkeysrd/calculation-service/internal/pkg/web/res"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/web/res/common"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/web/res/controllers"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/web/res/middleware"
 	"go.uber.org/dig"
 )
 
 type Server struct {
-	authController    *res.AuthController
-	userController    *res.UserController
-	jWTAuthMiddleware middleware.JWTAuthMiddleware
+	authController        *controllers.AuthController
+	userController        *controllers.UserController
+	jWTAuthMiddleware     middleware.JWTAuthMiddleware
+	operationController   *controllers.OperationController
+	calculationController *controllers.CalculationController
+	recordController      *controllers.RecordController
 }
 
 type ServerParams struct {
 	dig.In
-	AuthController    *res.AuthController
-	UserController    *res.UserController
-	JWTAuthMiddleware middleware.JWTAuthMiddleware
+	AuthController        *controllers.AuthController
+	UserController        *controllers.UserController
+	JWTAuthMiddleware     middleware.JWTAuthMiddleware
+	OperationController   *controllers.OperationController
+	CalculationController *controllers.CalculationController
+	RecordController      *controllers.RecordController
 }
 
 func NewServer(options ServerParams) *Server {
 	return &Server{
-		authController:    options.AuthController,
-		userController:    options.UserController,
+		authController:        options.AuthController,
+		userController:        options.UserController,
+		operationController:   options.OperationController,
+		calculationController: options.CalculationController,
+		recordController:      options.RecordController,
+
 		jWTAuthMiddleware: options.JWTAuthMiddleware,
 	}
 }
@@ -42,5 +53,13 @@ func (s *Server) registerRoutes(r *gin.Engine) {
 	s.authController.RegisterRoutes(v1.Group("/auth"))
 
 	authenticated := v1.Group("", s.jWTAuthMiddleware())
-	s.userController.RegisterRoutes(authenticated.Group("/users"))
+	authenticatedControllers := make(map[string]common.Controller)
+	authenticatedControllers["users"] = s.userController
+	authenticatedControllers["operations"] = s.operationController
+	authenticatedControllers["calculations"] = s.calculationController
+	authenticatedControllers["records"] = s.recordController
+
+	for path, controller := range authenticatedControllers {
+		controller.RegisterRoutes(authenticated.Group(path))
+	}
 }
