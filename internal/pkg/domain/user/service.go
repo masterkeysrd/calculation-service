@@ -24,7 +24,7 @@ type Service interface {
 	VerifyCredentials(username string, password string) (*FindUserResponse, error)
 }
 
-type userService struct {
+type service struct {
 	repository        Repository
 	createUserFactory UserFactory
 }
@@ -35,14 +35,14 @@ type UserServiceParams struct {
 	CreateUserFactory UserFactory
 }
 
-func NewUserService(options UserServiceParams) Service {
-	return &userService{
+func NewService(options UserServiceParams) Service {
+	return &service{
 		createUserFactory: options.CreateUserFactory,
 		repository:        options.Repository,
 	}
 }
 
-func (s userService) Get(id uint64) (*FindUserResponse, error) {
+func (s service) Get(id uint64) (*FindUserResponse, error) {
 	user, err := s.repository.FindByID(id)
 
 	if err != nil {
@@ -59,7 +59,7 @@ func (s userService) Get(id uint64) (*FindUserResponse, error) {
 	}, nil
 }
 
-func (s userService) GetByUserName(userName string) (*FindUserResponse, error) {
+func (s service) GetByUserName(userName string) (*FindUserResponse, error) {
 	if userName == "" {
 		return nil, ErrUserNameRequired
 	}
@@ -80,7 +80,7 @@ func (s userService) GetByUserName(userName string) (*FindUserResponse, error) {
 	}, nil
 }
 
-func (s userService) Create(request CreateUserRequest) error {
+func (s service) Create(request CreateUserRequest) error {
 	if user, _ := s.repository.FindByUserName(request.UserName); user != nil {
 		return ErrUserAlreadyExists
 	}
@@ -96,7 +96,7 @@ func (s userService) Create(request CreateUserRequest) error {
 	return nil
 }
 
-func (s userService) Delete(request DeleteUserRequest) error {
+func (s service) Delete(request DeleteUserRequest) error {
 	if request.UserID == 0 {
 		return ErrUserNameRequired
 	}
@@ -114,7 +114,7 @@ func (s userService) Delete(request DeleteUserRequest) error {
 	return s.repository.Delete(user)
 }
 
-func (s userService) VerifyCredentials(username string, password string) (*FindUserResponse, error) {
+func (s service) VerifyCredentials(username string, password string) (*FindUserResponse, error) {
 	user, err := s.repository.FindByUserName(username)
 
 	if err != nil {

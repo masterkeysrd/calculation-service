@@ -12,13 +12,13 @@ type Repository interface {
 	Delete(user *User) error
 }
 
-type FakeUserRepository struct {
+type repository struct {
 	counter uint64
 	users   []*User
 }
 
-func NewFakeUserRepository() Repository {
-	return &FakeUserRepository{
+func NewRepository() Repository {
+	return &repository{
 		counter: 1,
 		users: []*User{
 			{
@@ -30,7 +30,7 @@ func NewFakeUserRepository() Repository {
 	}
 }
 
-func (r *FakeUserRepository) FindByID(id uint64) (*User, error) {
+func (r *repository) FindByID(id uint64) (*User, error) {
 	for _, u := range r.users {
 		if u.ID == id {
 			return u, nil
@@ -40,7 +40,7 @@ func (r *FakeUserRepository) FindByID(id uint64) (*User, error) {
 	return nil, nil
 }
 
-func (r *FakeUserRepository) FindByUserName(userName string) (*User, error) {
+func (r *repository) FindByUserName(userName string) (*User, error) {
 	for _, u := range r.users {
 		if u.UserName == userName {
 			return u, nil
@@ -50,7 +50,7 @@ func (r *FakeUserRepository) FindByUserName(userName string) (*User, error) {
 	return nil, nil
 }
 
-func (r *FakeUserRepository) Create(user *User) error {
+func (r *repository) Create(user *User) error {
 	r.counter++
 	user.ID = r.counter
 	r.users = append(r.users, user)
@@ -58,7 +58,7 @@ func (r *FakeUserRepository) Create(user *User) error {
 	return nil
 }
 
-func (r *FakeUserRepository) Update(user *User) error {
+func (r *repository) Update(user *User) error {
 	for i, u := range r.users {
 		if u.ID == user.ID {
 			r.users[i] = user
@@ -68,7 +68,7 @@ func (r *FakeUserRepository) Update(user *User) error {
 	return nil
 }
 
-func (r *FakeUserRepository) Delete(user *User) error {
+func (r *repository) Delete(user *User) error {
 	for i, u := range r.users {
 		if u.ID == user.ID {
 			r.users = append(r.users[:i], r.users[i+1:]...)
