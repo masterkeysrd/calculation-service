@@ -1,4 +1,4 @@
-package res
+package controllers
 
 import (
 	"net/http"
@@ -23,13 +23,23 @@ func NewUserController(options UserControllerParams) *UserController {
 	}
 }
 
-func (c *UserController) RegisterRoutes(gin *gin.RouterGroup) {
-	gin.GET("me", c.FindMe)
-	gin.DELETE("me", c.DeleteMe)
+func (c *UserController) RegisterRoutes(router *gin.RouterGroup) {
+	router.GET("me", c.FindMe)
+	router.DELETE("me", c.DeleteMe)
 }
 
 func (c *UserController) FindMe(ctx *gin.Context) {
-	user, err := c.service.FindByUserName("admin@test.com")
+	userId := ctx.GetUint64("userId")
+
+	if userId == 0 {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"code":    http.StatusUnauthorized,
+			"message": "Unauthorized",
+		})
+		return
+	}
+
+	user, err := c.service.Get(userId)
 
 	if err != nil {
 		ctx.JSON(400, gin.H{
@@ -43,8 +53,18 @@ func (c *UserController) FindMe(ctx *gin.Context) {
 }
 
 func (c *UserController) DeleteMe(ctx *gin.Context) {
+	userId := ctx.GetUint64("userId")
+
+	if userId == 0 {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"code":    http.StatusUnauthorized,
+			"message": "Unauthorized",
+		})
+		return
+	}
+
 	err := c.service.Delete(user.DeleteUserRequest{
-		UserName: "admin@test.com",
+		UserID: userId,
 	})
 
 	if err != nil {
