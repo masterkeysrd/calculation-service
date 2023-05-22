@@ -1,6 +1,9 @@
 package user
 
-import "go.uber.org/dig"
+import (
+	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/balance"
+	"go.uber.org/dig"
+)
 
 type CreateUserRequest struct {
 	UserName string `json:"username" validate:"required,email"`
@@ -21,24 +24,28 @@ type Service interface {
 	GetByUserName(username string) (*FindUserResponse, error)
 	Create(request CreateUserRequest) error
 	Delete(request DeleteUserRequest) error
+	GetBalance(userId uint64) (*balance.BalanceGetResponse, error)
 	VerifyCredentials(username string, password string) (*FindUserResponse, error)
 }
 
 type service struct {
 	repository        Repository
 	createUserFactory UserFactory
+	balanceService    balance.Service
 }
 
 type UserServiceParams struct {
 	dig.In
 	Repository        Repository
 	CreateUserFactory UserFactory
+	BalanceService    balance.Service
 }
 
 func NewService(options UserServiceParams) Service {
 	return &service{
 		createUserFactory: options.CreateUserFactory,
 		repository:        options.Repository,
+		balanceService:    options.BalanceService,
 	}
 }
 
@@ -133,4 +140,8 @@ func (s service) VerifyCredentials(username string, password string) (*FindUserR
 		ID:       user.ID,
 		UserName: user.UserName,
 	}, nil
+}
+
+func (s service) GetBalance(userId uint64) (*balance.BalanceGetResponse, error) {
+	return s.balanceService.FindByUserID(userId)
 }
