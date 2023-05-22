@@ -9,6 +9,7 @@ var records = []Record{
 		OperationID: 1,
 		Amount:      100,
 		UserBalance: 100,
+		Result:      "100",
 		CreatedAt:   time.Now(),
 	},
 }

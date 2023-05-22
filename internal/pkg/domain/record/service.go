@@ -1,6 +1,7 @@
 package record
 
 import (
+	"errors"
 	"time"
 
 	"go.uber.org/dig"
@@ -32,6 +33,7 @@ type RecordResponse struct {
 	OperationID uint64    `json:"operationId"`
 	Amount      float64   `json:"amount"`
 	UserBalance float64   `json:"userBalance"`
+	Result      string    `json:"result"`
 	CreatedAt   time.Time `json:"date"`
 }
 
@@ -40,6 +42,7 @@ type CreateRecordRequest struct {
 	OperationID uint64  `json:"operationId"`
 	Amount      float64 `json:"amount"`
 	UserBalance float64 `json:"userBalance"`
+	Result      string  `json:"result"`
 }
 
 type DeleteRecordRequest struct {
@@ -68,14 +71,8 @@ func (s *recordService) Get(request GetRecordRequest) (*RecordResponse, error) {
 		return nil, err
 	}
 
-	return &RecordResponse{
-		ID:          record.ID,
-		UserID:      record.UserID,
-		OperationID: record.OperationID,
-		Amount:      record.Amount,
-		UserBalance: record.UserBalance,
-		CreatedAt:   record.CreatedAt,
-	}, nil
+	response := (RecordResponse(*record))
+	return &response, nil
 }
 
 func (s *recordService) List(request ListRecordRequest) (*ListRecordResponse, error) {
@@ -95,32 +92,27 @@ func (s *recordService) List(request ListRecordRequest) (*ListRecordResponse, er
 }
 
 func (s *recordService) Create(request CreateRecordRequest) (*RecordResponse, error) {
-	record := NewRecord(NewRecordInput{
-		UserID:      request.UserID,
-		OperationID: request.OperationID,
-		Amount:      request.Amount,
-		UserBalance: request.UserBalance,
-	})
+	record := NewRecord(
+		NewRecordInput(request),
+	)
 
 	err := s.repository.Create(record)
 	if err != nil {
 		return nil, err
 	}
 
-	return &RecordResponse{
-		ID:          record.ID,
-		UserID:      record.UserID,
-		OperationID: record.OperationID,
-		Amount:      record.Amount,
-		UserBalance: record.UserBalance,
-		CreatedAt:   record.CreatedAt,
-	}, nil
+	response := (RecordResponse(*record))
+	return &response, nil
 }
 
 func (s *recordService) Delete(request DeleteRecordRequest) error {
 	record, err := s.repository.FindByUserIDAndID(request.UserID, request.ID)
 	if err != nil {
 		return err
+	}
+
+	if record == nil {
+		return errors.New("record not found")
 	}
 
 	return s.repository.Delete(record)
