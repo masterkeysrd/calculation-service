@@ -26,6 +26,7 @@ func NewUserController(options UserControllerParams) *UserController {
 func (c *UserController) RegisterRoutes(router *gin.RouterGroup) {
 	router.GET("me", c.FindMe)
 	router.DELETE("me", c.DeleteMe)
+	router.GET("me/balance", c.GetMyBalance)
 }
 
 func (c *UserController) FindMe(ctx *gin.Context) {
@@ -76,4 +77,27 @@ func (c *UserController) DeleteMe(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusNoContent, nil)
+}
+
+func (c *UserController) GetMyBalance(ctx *gin.Context) {
+	userId := ctx.GetUint64("userId")
+
+	if userId == 0 {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"code":    http.StatusUnauthorized,
+			"message": "Unauthorized",
+		})
+		return
+	}
+
+	balance, err := c.service.GetBalance(userId)
+	if err != nil {
+		ctx.JSON(400, gin.H{
+			"code":    400,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(200, balance)
 }
