@@ -32,14 +32,20 @@ func (c *CalculationController) Calculate(ctx *gin.Context) {
 	var request calculation.CalculateRequest
 
 	if err := ctx.ShouldBindJSON(&request); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": err.Error(),
+		})
 		return
 	}
 
 	request.UserID = userId
 	response, err := c.calculationService.Calculate(request)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": err.Error(),
+		})
 		return
 	}
 
