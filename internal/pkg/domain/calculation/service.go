@@ -91,6 +91,7 @@ func (s *service) Calculate(request CalculateRequest) (*CalculateResponse, error
 		OperationID: request.OperationId,
 		Amount:      operation.Cost,
 		UserBalance: balance.Amount,
+		Result:      result,
 	})
 
 	if err != nil {
