@@ -2,6 +2,8 @@ package user
 
 import (
 	"errors"
+
+	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/security/hash"
 )
 
 type Repository interface {
@@ -18,13 +20,14 @@ type repository struct {
 }
 
 func NewRepository() Repository {
+	h, _ := hash.HashPassword("admin")
 	return &repository{
 		counter: 1,
 		users: []*User{
 			{
 				ID:       1,
 				UserName: "admin@test.com",
-				Password: "admin",
+				Password: h,
 			},
 		},
 	}

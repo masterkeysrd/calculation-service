@@ -1,6 +1,7 @@
 package user
 
 import (
+	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/security/hash"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/validator"
 )
 
@@ -8,12 +9,18 @@ type UserFactory = func(userName, password string) (*User, error)
 
 func NewUserFactory(validator *validator.Validator) UserFactory {
 	return func(userName, password string) (*User, error) {
-		user := &User{
-			UserName: userName,
-			Password: password,
+		passwordHash, err := hash.HashPassword(password)
+
+		if err != nil {
+			return nil, err
 		}
 
-		err := validator.Validate(user)
+		user := &User{
+			UserName: userName,
+			Password: passwordHash,
+		}
+
+		err = validator.Validate(user)
 
 		if err != nil {
 			return nil, err

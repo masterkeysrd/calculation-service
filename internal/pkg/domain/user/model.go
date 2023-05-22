@@ -1,5 +1,7 @@
 package user
 
+import "github.com/masterkeysrd/calculation-service/internal/pkg/infra/security/hash"
+
 type User struct {
 	ID       uint64
 	UserName string `validate:"required,email"`
@@ -7,7 +9,7 @@ type User struct {
 }
 
 func (u *User) ComparePassword(password string) error {
-	if u.Password != password {
+	if err := hash.ComparePassword(u.Password, password); err != nil {
 		return ErrInvalidCredentials
 	}
 
