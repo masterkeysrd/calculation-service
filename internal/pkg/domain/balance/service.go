@@ -1,10 +1,11 @@
 package balance
 
-import "go.uber.org/dig"
+import (
+	"go.uber.org/dig"
+)
 
 type Service interface {
 	FindByUserID(userID uint) (*BalanceGetResponse, error)
-	Create(request CreateBalanceRequest) error
 	Reserve(request BalanceTransactionRequest) (*BalanceGetResponse, error)
 	Release(request BalanceTransactionRequest) (*BalanceGetResponse, error)
 	Commit(request BalanceTransactionRequest) (*BalanceGetResponse, error)
@@ -42,108 +43,65 @@ func NewService(params ServiceParams) Service {
 }
 
 func (s *balanceService) FindByUserID(userID uint) (*BalanceGetResponse, error) {
-	balance, err := s.repository.FindByUserID(userID)
+	balance, err := s.repository.GetWithUserID(userID)
 	if err != nil {
 		return nil, err
 	}
 
-	return &BalanceGetResponse{
-		Amount:         balance.Amount,
-		InFlightAmount: balance.InFlight,
-	}, nil
-}
-
-func (s *balanceService) Create(request CreateBalanceRequest) error {
-	balance := NewBalance(NewBalanceInput(request))
-	return s.repository.Create(balance)
+	return mapToResponse(balance), nil
 }
 
 func (s *balanceService) Reserve(request BalanceTransactionRequest) (*BalanceGetResponse, error) {
-	balance, err := s.repository.FindByUserID(request.UserID)
+	balance, err := s.repository.PerformTransaction(request.UserID, func(balance *Balance) error {
+		return balance.Reserve(request.Amount)
+	})
+
 	if err != nil {
 		return nil, err
 	}
 
-	err = balance.Reserve(request.Amount)
-	if err != nil {
-		return nil, err
-	}
-
-	err = s.repository.Update(balance)
-	if err != nil {
-		return nil, err
-	}
-
-	return &BalanceGetResponse{
-		Amount:         balance.Amount,
-		InFlightAmount: balance.InFlight,
-	}, nil
+	return mapToResponse(balance), nil
 }
 
 func (s *balanceService) Release(request BalanceTransactionRequest) (*BalanceGetResponse, error) {
-	balance, err := s.repository.FindByUserID(request.UserID)
+	balance, err := s.repository.PerformTransaction(request.UserID, func(balance *Balance) error {
+		return balance.Release(request.Amount)
+	})
+
 	if err != nil {
 		return nil, err
 	}
 
-	err = balance.Release(request.Amount)
-	if err != nil {
-		return nil, err
-	}
-
-	err = s.repository.Update(balance)
-	if err != nil {
-		return nil, err
-	}
-
-	return &BalanceGetResponse{
-		Amount:         balance.Amount,
-		InFlightAmount: balance.InFlight,
-	}, nil
+	return mapToResponse(balance), nil
 }
 
 func (s *balanceService) Commit(request BalanceTransactionRequest) (*BalanceGetResponse, error) {
-	balance, err := s.repository.FindByUserID(request.UserID)
-	if err != nil {
-		return nil, err
-	}
-
-	err = balance.Confirm(request.Amount)
+	balance, err := s.repository.PerformTransaction(request.UserID, func(balance *Balance) error {
+		return balance.Confirm(request.Amount)
+	})
 
 	if err != nil {
 		return nil, err
 	}
 
-	err = s.repository.Update(balance)
-	if err != nil {
-		return nil, err
-	}
-
-	return &BalanceGetResponse{
-		Amount:         balance.Amount,
-		InFlightAmount: balance.InFlight,
-	}, nil
+	return mapToResponse(balance), nil
 }
 
 func (s *balanceService) Rollback(request BalanceTransactionRequest) (*BalanceGetResponse, error) {
-	balance, err := s.repository.FindByUserID(request.UserID)
-	if err != nil {
-		return nil, err
-	}
-
-	err = balance.Rollback(request.Amount)
+	balance, err := s.repository.PerformTransaction(request.UserID, func(balance *Balance) error {
+		return balance.Rollback(request.Amount)
+	})
 
 	if err != nil {
 		return nil, err
 	}
 
-	err = s.repository.Update(balance)
-	if err != nil {
-		return nil, err
-	}
+	return mapToResponse(balance), nil
+}
 
+func mapToResponse(balance *Balance) *BalanceGetResponse {
 	return &BalanceGetResponse{
 		Amount:         balance.Amount,
-		InFlightAmount: balance.InFlight,
-	}, nil
+		InFlightAmount: balance.InFlightAmount,
+	}
 }

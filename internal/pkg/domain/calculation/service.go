@@ -75,11 +75,6 @@ func (s *service) Calculate(request CalculateRequest) (*CalculateResponse, error
 		return nil, err
 	}
 
-	if err != nil {
-		s.balanceService.Release(transaction)
-		return nil, err
-	}
-
 	balance, err := s.balanceService.Commit(transaction)
 	if err != nil {
 		s.balanceService.Release(transaction)

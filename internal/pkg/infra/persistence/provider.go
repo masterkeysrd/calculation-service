@@ -19,6 +19,7 @@ func registerRepositories(container *dig.Container) error {
 		repositories.NewUserRepository,
 		repositories.NewOperationRepository,
 		repositories.NewRecordRepository,
+		repositories.NewBalanceRepository,
 	}
 
 	for _, provider := range providers {
