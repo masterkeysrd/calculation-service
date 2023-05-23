@@ -29,7 +29,7 @@ func (r *balanceRepository) GetWithUserID(userID uint) (*balance.Balance, error)
 		ID:             model.ID,
 		UserID:         model.UserID,
 		Amount:         model.Amount,
-		InFlightAmount: model.AmountInFlight,
+		AmountInFlight: model.AmountInFlight,
 	}, nil
 }
 
@@ -54,7 +54,7 @@ func (r *balanceRepository) PerformTransaction(userId uint, fc func(*balance.Bal
 			ID:             entity.ID,
 			UserID:         entity.UserID,
 			Amount:         entity.Amount,
-			InFlightAmount: entity.AmountInFlight,
+			AmountInFlight: entity.AmountInFlight,
 		}
 
 		if err := fc(model); err != nil {
@@ -62,7 +62,7 @@ func (r *balanceRepository) PerformTransaction(userId uint, fc func(*balance.Bal
 		}
 
 		entity.Amount = model.Amount
-		entity.AmountInFlight = model.InFlightAmount
+		entity.AmountInFlight = model.AmountInFlight
 
 		if err := tx.Save(&entity).Error; err != nil {
 			return err

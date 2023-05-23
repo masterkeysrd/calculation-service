@@ -14,7 +14,7 @@ type Service interface {
 
 type BalanceGetResponse struct {
 	Amount         float64 `json:"amount"`
-	InFlightAmount float64 `json:"inFlightAmount"`
+	AmountInFlight float64 `json:"amountInFlight"`
 }
 
 type CreateBalanceRequest struct {
@@ -102,6 +102,6 @@ func (s *balanceService) Rollback(request BalanceTransactionRequest) (*BalanceGe
 func mapToResponse(balance *Balance) *BalanceGetResponse {
 	return &BalanceGetResponse{
 		Amount:         balance.Amount,
-		InFlightAmount: balance.InFlightAmount,
+		AmountInFlight: balance.AmountInFlight,
 	}
 }
