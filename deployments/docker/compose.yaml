@@ -1,0 +1,36 @@
+version: "3.7"
+name: calculation-system
+
+services:
+  database:
+    image: postgres:15.3-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - ./volumes/postgres-data:/var/lib/postgresql/data
+    networks:
+      - calculation-system
+
+  pgadmin:
+    image: dpage/pgadmin4:7.1
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: root@calculation-system.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - 5050:80
+    volumes:
+      - ./volumes/pgadmin-data:/var/lib/pgadmin
+    networks:
+      - calculation-system
+    depends_on:
+      - database
+
+networks:
+  calculation-system:
+    driver: bridge
