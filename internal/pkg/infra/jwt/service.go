@@ -135,7 +135,7 @@ func (s *service) ValidateToken(c *gin.Context) error {
 	}
 
 	c.Set("tokenId", claims["jti"])
-	c.Set("userId", userId)
+	c.Set("userId", uint(userId))
 
 	return nil
 }
