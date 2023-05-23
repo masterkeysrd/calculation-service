@@ -18,6 +18,7 @@ func NewDatabase(config *Config) *gorm.DB {
 	}
 
 	database.AutoMigrate(&models.User{})
+	database.AutoMigrate(&models.Balance{})
 	return database
 }
 

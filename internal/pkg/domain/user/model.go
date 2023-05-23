@@ -6,6 +6,13 @@ type User struct {
 	ID       uint
 	UserName string `validate:"required,email"`
 	Password string `validate:"required"`
+	Balance  *UserBalance
+}
+
+type UserBalance struct {
+	ID             uint
+	Amount         float64
+	AmountInFlight float64
 }
 
 func (u *User) ComparePassword(password string) error {

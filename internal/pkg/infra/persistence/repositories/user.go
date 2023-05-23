@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/user"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/persistence/models"
@@ -19,7 +20,8 @@ func NewUserRepository(db *gorm.DB) user.Repository {
 func (r *userRepository) FindByID(id uint) (*user.User, error) {
 	var u models.User
 
-	err := r.db.First(&u, id).Error
+	err := r.db.Model(&models.User{}).Preload("Balance").First(&u, id).Error
+
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, user.ErrUserNotFound
 	}
@@ -28,16 +30,14 @@ func (r *userRepository) FindByID(id uint) (*user.User, error) {
 		return nil, err
 	}
 
-	return &user.User{
-		ID:       u.ID,
-		UserName: u.Username,
-		Password: u.Password,
-	}, nil
+	return mapUserToDomain(&u), nil
 }
 
 func (r *userRepository) FindByUserName(userName string) (*user.User, error) {
 	var u models.User
-	err := r.db.Where("username = ?", userName).First(&u).Error
+	err := r.db.Model(&models.User{}).Preload("Balance").Where("username = ?", userName).First(&u).Error
+
+	fmt.Println("FindByUserName user.Balance.Amount=", u.Balance.Amount)
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, user.ErrUserNotFound
@@ -47,17 +47,17 @@ func (r *userRepository) FindByUserName(userName string) (*user.User, error) {
 		return nil, err
 	}
 
-	return &user.User{
-		ID:       u.ID,
-		UserName: u.Username,
-		Password: u.Password,
-	}, nil
+	return mapUserToDomain(&u), nil
 }
 
 func (r *userRepository) Create(user *user.User) error {
 	u := &models.User{
 		Username: user.UserName,
 		Password: user.Password,
+		Balance: models.Balance{
+			Amount:         user.Balance.Amount,
+			AmountInFlight: user.Balance.AmountInFlight,
+		},
 	}
 
 	if err := r.db.Create(u).Error; err != nil {
@@ -87,4 +87,17 @@ func (r *userRepository) Delete(user *user.User) error {
 	}
 
 	return nil
+}
+
+func mapUserToDomain(u *models.User) *user.User {
+
+	return &user.User{
+		ID:       u.ID,
+		UserName: u.Username,
+		Password: u.Password,
+		Balance: &user.UserBalance{
+			Amount:         u.Balance.Amount,
+			AmountInFlight: u.Balance.AmountInFlight,
+		},
+	}
 }

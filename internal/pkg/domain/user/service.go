@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/balance"
 	"go.uber.org/dig"
 )
 
@@ -17,42 +16,45 @@ type DeleteUserRequest struct {
 	UserID uint `json:"username" validate:"required,email"`
 }
 
-type FindUserResponse struct {
-	ID       uint   `json:"id"`
-	UserName string `json:"username"`
+type UserResponse struct {
+	ID       uint                `json:"id"`
+	UserName string              `json:"username"`
+	Balance  UserBalanceResponse `json:"balance"`
+}
+
+type UserBalanceResponse struct {
+	Amount         float64 `json:"amount"`
+	AmountInFlight float64 `json:"amount_in_flight"`
 }
 
 type Service interface {
-	Get(id uint) (*FindUserResponse, error)
-	GetByUserName(username string) (*FindUserResponse, error)
+	Get(id uint) (*UserResponse, error)
+	GetByUserName(username string) (*UserResponse, error)
 	Create(request CreateUserRequest) error
 	Delete(request DeleteUserRequest) error
-	GetBalance(userId uint) (*balance.BalanceGetResponse, error)
-	VerifyCredentials(username string, password string) (*FindUserResponse, error)
+	GetBalance(userId uint) (*UserBalanceResponse, error)
+	VerifyCredentials(username string, password string) (*UserResponse, error)
 }
 
 type service struct {
 	repository        Repository
 	createUserFactory UserFactory
-	balanceService    balance.Service
 }
 
 type UserServiceParams struct {
 	dig.In
 	Repository        Repository
 	CreateUserFactory UserFactory
-	BalanceService    balance.Service
 }
 
 func NewService(options UserServiceParams) Service {
 	return &service{
 		createUserFactory: options.CreateUserFactory,
 		repository:        options.Repository,
-		balanceService:    options.BalanceService,
 	}
 }
 
-func (s service) Get(id uint) (*FindUserResponse, error) {
+func (s service) Get(id uint) (*UserResponse, error) {
 	user, err := s.repository.FindByID(id)
 
 	if err != nil {
@@ -61,13 +63,17 @@ func (s service) Get(id uint) (*FindUserResponse, error) {
 
 	fmt.Println("Get user.UserName=", user.UserName)
 
-	return &FindUserResponse{
+	return &UserResponse{
 		ID:       user.ID,
 		UserName: user.UserName,
+		Balance: UserBalanceResponse{
+			Amount:         user.Balance.Amount,
+			AmountInFlight: user.Balance.AmountInFlight,
+		},
 	}, nil
 }
 
-func (s service) GetByUserName(userName string) (*FindUserResponse, error) {
+func (s service) GetByUserName(userName string) (*UserResponse, error) {
 	if userName == "" {
 		return nil, ErrUserNameRequired
 	}
@@ -78,7 +84,7 @@ func (s service) GetByUserName(userName string) (*FindUserResponse, error) {
 		return nil, err
 	}
 
-	return &FindUserResponse{
+	return &UserResponse{
 		ID:       user.ID,
 		UserName: user.UserName,
 	}, nil
@@ -90,12 +96,14 @@ func (s service) Create(request CreateUserRequest) error {
 	}
 
 	user, err := s.createUserFactory(request.UserName, request.Password)
-
 	if err != nil {
 		return err
 	}
 
-	s.repository.Create(user)
+	err = s.repository.Create(user)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -118,7 +126,7 @@ func (s service) Delete(request DeleteUserRequest) error {
 	return s.repository.Delete(user)
 }
 
-func (s service) VerifyCredentials(username string, password string) (*FindUserResponse, error) {
+func (s service) VerifyCredentials(username string, password string) (*UserResponse, error) {
 	user, err := s.repository.FindByUserName(username)
 
 	if errors.Is(err, ErrUserNotFound) {
@@ -133,12 +141,25 @@ func (s service) VerifyCredentials(username string, password string) (*FindUserR
 		return nil, err
 	}
 
-	return &FindUserResponse{
+	return &UserResponse{
 		ID:       user.ID,
 		UserName: user.UserName,
 	}, nil
 }
 
-func (s service) GetBalance(userId uint) (*balance.BalanceGetResponse, error) {
-	return s.balanceService.FindByUserID(userId)
+func (s service) GetBalance(userId uint) (*UserBalanceResponse, error) {
+	user, err := s.repository.FindByID(userId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if user.Balance == nil {
+		return nil, ErrUserBalanceNotFound
+	}
+
+	return &UserBalanceResponse{
+		Amount:         user.Balance.Amount,
+		AmountInFlight: user.Balance.AmountInFlight,
+	}, nil
 }

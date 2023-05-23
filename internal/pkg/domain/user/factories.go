@@ -18,6 +18,10 @@ func NewUserFactory(validator *validator.Validator) UserFactory {
 		user := &User{
 			UserName: userName,
 			Password: passwordHash,
+			Balance: &UserBalance{
+				Amount:         10,
+				AmountInFlight: 0,
+			},
 		}
 
 		err = validator.Validate(user)
