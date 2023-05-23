@@ -11,5 +11,9 @@ func RegisterProviders(container *dig.Container) error {
 		return err
 	}
 
+	if err := container.Provide(GetDatabaseConfig); err != nil {
+		return err
+	}
+
 	return nil
 }

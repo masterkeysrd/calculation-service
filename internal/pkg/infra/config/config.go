@@ -3,11 +3,13 @@ package config
 import (
 	"github.com/gookit/config/v2"
 	"github.com/gookit/config/v2/yaml"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/database"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/jwt"
 )
 
 type Config struct {
-	JWT *jwt.Config `mapstructure:"jwt"`
+	JWT      *jwt.Config      `mapstructure:"jwt"`
+	Database *database.Config `mapstructure:"database"`
 }
 
 func LoadConfig() {
@@ -29,4 +31,8 @@ func GetConfig() *Config {
 
 func GetJWTConfig(config *Config) *jwt.Config {
 	return config.JWT
+}
+
+func GetDatabaseConfig(config *Config) *database.Config {
+	return config.Database
 }
