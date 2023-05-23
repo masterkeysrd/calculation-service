@@ -15,12 +15,16 @@ func RegisterProviders(container *dig.Container) error {
 }
 
 func registerRepositories(container *dig.Container) error {
-	if err := container.Provide(repositories.NewUserRepository); err != nil {
-		return err
+	providers := []interface{}{
+		repositories.NewUserRepository,
+		repositories.NewOperationRepository,
+		repositories.NewRecordRepository,
 	}
 
-	if err := container.Provide(repositories.NewOperationRepository); err != nil {
-		return err
+	for _, provider := range providers {
+		if err := container.Provide(provider); err != nil {
+			return err
+		}
 	}
 
 	return nil

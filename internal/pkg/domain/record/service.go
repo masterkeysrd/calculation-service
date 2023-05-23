@@ -19,7 +19,7 @@ type ListRecordRequest struct {
 }
 
 type ListRecordResponse struct {
-	Data []RecordResponse `json:"data"`
+	Data []*RecordResponse `json:"data"`
 }
 
 type GetRecordRequest struct {
@@ -28,13 +28,14 @@ type GetRecordRequest struct {
 }
 
 type RecordResponse struct {
-	ID          uint      `json:"id"`
-	UserID      uint      `json:"userId"`
-	OperationID uint      `json:"operationId"`
-	Amount      float64   `json:"amount"`
-	UserBalance float64   `json:"userBalance"`
-	Result      string    `json:"result"`
-	CreatedAt   time.Time `json:"date"`
+	ID            uint      `json:"id"`
+	UserID        uint      `json:"userId"`
+	OperationID   uint      `json:"operationId"`
+	OperationType string    `json:"operationType"`
+	Amount        float64   `json:"amount"`
+	UserBalance   float64   `json:"userBalance"`
+	Result        string    `json:"result"`
+	CreatedAt     time.Time `json:"date"`
 }
 
 type CreateRecordRequest struct {
@@ -66,24 +67,23 @@ func NewService(params RecordServiceParams) Service {
 }
 
 func (s *recordService) Get(request GetRecordRequest) (*RecordResponse, error) {
-	record, err := s.repository.FindByUserIDAndID(request.UserID, request.ID)
+	record, err := s.repository.GetWithUserID(request.UserID, request.ID)
 	if err != nil {
 		return nil, err
 	}
 
-	response := (RecordResponse(*record))
-	return &response, nil
+	return mapRecordToResponse(record), nil
 }
 
 func (s *recordService) List(request ListRecordRequest) (*ListRecordResponse, error) {
-	records, err := s.repository.FindByUserID(request.UserID)
+	records, err := s.repository.ListWithUserID(request.UserID)
 	if err != nil {
 		return nil, err
 	}
 
-	result := []RecordResponse{}
-	for _, record := range *records {
-		result = append(result, RecordResponse(record))
+	result := []*RecordResponse{}
+	for _, record := range records {
+		result = append(result, mapRecordToResponse(record))
 	}
 
 	return &ListRecordResponse{
@@ -101,12 +101,11 @@ func (s *recordService) Create(request CreateRecordRequest) (*RecordResponse, er
 		return nil, err
 	}
 
-	response := (RecordResponse(*record))
-	return &response, nil
+	return mapRecordToResponse(record), nil
 }
 
 func (s *recordService) Delete(request DeleteRecordRequest) error {
-	record, err := s.repository.FindByUserIDAndID(request.UserID, request.ID)
+	record, err := s.repository.GetWithUserID(request.UserID, request.ID)
 	if err != nil {
 		return err
 	}
@@ -116,4 +115,17 @@ func (s *recordService) Delete(request DeleteRecordRequest) error {
 	}
 
 	return s.repository.Delete(record)
+}
+
+func mapRecordToResponse(record *Record) *RecordResponse {
+	return &RecordResponse{
+		ID:            record.ID,
+		UserID:        record.UserID,
+		OperationID:   record.Operation.ID,
+		OperationType: record.Operation.Type,
+		Amount:        record.Amount,
+		UserBalance:   record.UserBalance,
+		Result:        record.Result,
+		CreatedAt:     record.CreatedAt,
+	}
 }

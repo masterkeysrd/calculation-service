@@ -21,6 +21,7 @@ func NewDatabase(config *Config) *gorm.DB {
 	database.AutoMigrate(&models.User{})
 	database.AutoMigrate(&models.Balance{})
 	database.AutoMigrate(&models.Operation{})
+	database.AutoMigrate(&models.Record{})
 
 	err = loader.LoadDefaultOperations(database)
 	if err != nil {

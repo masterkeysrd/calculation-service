@@ -5,11 +5,16 @@ import "time"
 type Record struct {
 	ID          uint
 	UserID      uint
-	OperationID uint
+	Operation   RecordOperation
 	Amount      float64
 	UserBalance float64
 	Result      string
 	CreatedAt   time.Time
+}
+
+type RecordOperation struct {
+	ID   uint
+	Type string
 }
 
 type NewRecordInput struct {
@@ -22,8 +27,10 @@ type NewRecordInput struct {
 
 func NewRecord(input NewRecordInput) *Record {
 	return &Record{
-		UserID:      input.UserID,
-		OperationID: input.OperationID,
+		UserID: input.UserID,
+		Operation: RecordOperation{
+			ID: input.OperationID,
+		},
 		Amount:      input.Amount,
 		UserBalance: input.UserBalance,
 		Result:      input.Result,
