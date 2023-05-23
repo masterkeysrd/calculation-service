@@ -15,7 +15,7 @@ type Service interface {
 }
 
 type ListRecordRequest struct {
-	UserID uint64
+	UserID uint
 }
 
 type ListRecordResponse struct {
@@ -23,14 +23,14 @@ type ListRecordResponse struct {
 }
 
 type GetRecordRequest struct {
-	UserID uint64
-	ID     uint64
+	UserID uint
+	ID     uint
 }
 
 type RecordResponse struct {
-	ID          uint64    `json:"id"`
-	UserID      uint64    `json:"userId"`
-	OperationID uint64    `json:"operationId"`
+	ID          uint      `json:"id"`
+	UserID      uint      `json:"userId"`
+	OperationID uint      `json:"operationId"`
 	Amount      float64   `json:"amount"`
 	UserBalance float64   `json:"userBalance"`
 	Result      string    `json:"result"`
@@ -38,16 +38,16 @@ type RecordResponse struct {
 }
 
 type CreateRecordRequest struct {
-	UserID      uint64  `json:"userId"`
-	OperationID uint64  `json:"operationId"`
+	UserID      uint    `json:"userId"`
+	OperationID uint    `json:"operationId"`
 	Amount      float64 `json:"amount"`
 	UserBalance float64 `json:"userBalance"`
 	Result      string  `json:"result"`
 }
 
 type DeleteRecordRequest struct {
-	UserID uint64
-	ID     uint64
+	UserID uint
+	ID     uint
 }
 
 type recordService struct {

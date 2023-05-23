@@ -1,6 +1,9 @@
 package user
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/balance"
 	"go.uber.org/dig"
 )
@@ -11,20 +14,20 @@ type CreateUserRequest struct {
 }
 
 type DeleteUserRequest struct {
-	UserID uint64 `json:"username" validate:"required,email"`
+	UserID uint `json:"username" validate:"required,email"`
 }
 
 type FindUserResponse struct {
-	ID       uint64 `json:"id"`
+	ID       uint   `json:"id"`
 	UserName string `json:"username"`
 }
 
 type Service interface {
-	Get(id uint64) (*FindUserResponse, error)
+	Get(id uint) (*FindUserResponse, error)
 	GetByUserName(username string) (*FindUserResponse, error)
 	Create(request CreateUserRequest) error
 	Delete(request DeleteUserRequest) error
-	GetBalance(userId uint64) (*balance.BalanceGetResponse, error)
+	GetBalance(userId uint) (*balance.BalanceGetResponse, error)
 	VerifyCredentials(username string, password string) (*FindUserResponse, error)
 }
 
@@ -49,16 +52,14 @@ func NewService(options UserServiceParams) Service {
 	}
 }
 
-func (s service) Get(id uint64) (*FindUserResponse, error) {
+func (s service) Get(id uint) (*FindUserResponse, error) {
 	user, err := s.repository.FindByID(id)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if user == nil || user.ID == 0 {
-		return nil, ErrUserNotFound
-	}
+	fmt.Println("Get user.UserName=", user.UserName)
 
 	return &FindUserResponse{
 		ID:       user.ID,
@@ -75,10 +76,6 @@ func (s service) GetByUserName(userName string) (*FindUserResponse, error) {
 
 	if err != nil {
 		return nil, err
-	}
-
-	if user == nil || user.ID == 0 {
-		return nil, ErrUserNotFound
 	}
 
 	return &FindUserResponse{
@@ -124,12 +121,12 @@ func (s service) Delete(request DeleteUserRequest) error {
 func (s service) VerifyCredentials(username string, password string) (*FindUserResponse, error) {
 	user, err := s.repository.FindByUserName(username)
 
-	if err != nil {
-		return nil, err
+	if errors.Is(err, ErrUserNotFound) {
+		return nil, ErrInvalidCredentials
 	}
 
-	if user == nil || user.ID == 0 {
-		return nil, ErrInvalidCredentials
+	if err != nil {
+		return nil, err
 	}
 
 	if err := user.ComparePassword(password); err != nil {
@@ -142,6 +139,6 @@ func (s service) VerifyCredentials(username string, password string) (*FindUserR
 	}, nil
 }
 
-func (s service) GetBalance(userId uint64) (*balance.BalanceGetResponse, error) {
+func (s service) GetBalance(userId uint) (*balance.BalanceGetResponse, error) {
 	return s.balanceService.FindByUserID(userId)
 }

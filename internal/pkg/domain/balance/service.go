@@ -3,7 +3,7 @@ package balance
 import "go.uber.org/dig"
 
 type Service interface {
-	FindByUserID(userID uint64) (*BalanceGetResponse, error)
+	FindByUserID(userID uint) (*BalanceGetResponse, error)
 	Create(request CreateBalanceRequest) error
 	Reserve(request BalanceTransactionRequest) (*BalanceGetResponse, error)
 	Release(request BalanceTransactionRequest) (*BalanceGetResponse, error)
@@ -17,12 +17,12 @@ type BalanceGetResponse struct {
 }
 
 type CreateBalanceRequest struct {
-	UserID uint64  `json:"userId"`
+	UserID uint    `json:"userId"`
 	Amount float64 `json:"amount"`
 }
 
 type BalanceTransactionRequest struct {
-	UserID uint64  `json:"userId"`
+	UserID uint    `json:"userId"`
 	Amount float64 `json:"amount"`
 }
 
@@ -41,7 +41,7 @@ func NewService(params ServiceParams) Service {
 	}
 }
 
-func (s *balanceService) FindByUserID(userID uint64) (*BalanceGetResponse, error) {
+func (s *balanceService) FindByUserID(userID uint) (*BalanceGetResponse, error) {
 	balance, err := s.repository.FindByUserID(userID)
 	if err != nil {
 		return nil, err

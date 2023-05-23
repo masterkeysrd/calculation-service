@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -30,7 +31,8 @@ func (c *UserController) RegisterRoutes(router *gin.RouterGroup) {
 }
 
 func (c *UserController) FindMe(ctx *gin.Context) {
-	userId := ctx.GetUint64("userId")
+	userId := ctx.GetUint("userId")
+	fmt.Println("userId: ", userId)
 
 	if userId == 0 {
 		ctx.JSON(http.StatusUnauthorized, gin.H{
@@ -54,7 +56,7 @@ func (c *UserController) FindMe(ctx *gin.Context) {
 }
 
 func (c *UserController) DeleteMe(ctx *gin.Context) {
-	userId := ctx.GetUint64("userId")
+	userId := ctx.GetUint("userId")
 
 	if userId == 0 {
 		ctx.JSON(http.StatusUnauthorized, gin.H{
@@ -80,7 +82,7 @@ func (c *UserController) DeleteMe(ctx *gin.Context) {
 }
 
 func (c *UserController) GetMyBalance(ctx *gin.Context) {
-	userId := ctx.GetUint64("userId")
+	userId := ctx.GetUint("userId")
 
 	if userId == 0 {
 		ctx.JSON(http.StatusUnauthorized, gin.H{

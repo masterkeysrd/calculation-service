@@ -15,8 +15,8 @@ var records = []Record{
 }
 
 type Repository interface {
-	FindByUserID(userID uint64) (*[]Record, error)
-	FindByUserIDAndID(userID uint64, id uint64) (*Record, error)
+	FindByUserID(userID uint) (*[]Record, error)
+	FindByUserIDAndID(userID uint, id uint) (*Record, error)
 	Create(record *Record) error
 	Update(record *Record) error
 	Delete(record *Record) error
@@ -28,7 +28,7 @@ func NewRepository() Repository {
 	return &repository{}
 }
 
-func (r *repository) FindByUserID(userID uint64) (*[]Record, error) {
+func (r *repository) FindByUserID(userID uint) (*[]Record, error) {
 	result := []Record{}
 	for _, record := range records {
 		if record.UserID == userID {
@@ -38,7 +38,7 @@ func (r *repository) FindByUserID(userID uint64) (*[]Record, error) {
 	return &result, nil
 }
 
-func (r *repository) FindByUserIDAndID(userID uint64, id uint64) (*Record, error) {
+func (r *repository) FindByUserIDAndID(userID uint, id uint) (*Record, error) {
 	for _, record := range records {
 		if record.UserID == userID && record.ID == id {
 			return &record, nil

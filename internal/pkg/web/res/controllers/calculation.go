@@ -28,7 +28,7 @@ func (c *CalculationController) RegisterRoutes(router *gin.RouterGroup) {
 }
 
 func (c *CalculationController) Calculate(ctx *gin.Context) {
-	userId := ctx.GetUint64("userId")
+	userId := ctx.GetUint("userId")
 	var request calculation.CalculateRequest
 
 	if err := ctx.ShouldBindJSON(&request); err != nil {

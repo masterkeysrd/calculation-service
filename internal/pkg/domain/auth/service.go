@@ -49,7 +49,10 @@ func (s *authService) SignIn(request SignInRequest) (*SignInResponse, error) {
 		return nil, err
 	}
 
-	tokens, err := s.jwtService.GenerateTokens(strconv.FormatUint(user.ID, 10))
+	tokens, err := s.jwtService.GenerateTokens(
+		strconv.FormatUint(uint64(user.ID), 10),
+	)
+
 	if err != nil {
 		return nil, err
 	}

@@ -31,7 +31,7 @@ func (c *RecordController) RegisterRoutes(router *gin.RouterGroup) {
 }
 
 func (c *RecordController) List(ctx *gin.Context) {
-	userID := ctx.GetUint64("userId")
+	userID := ctx.GetUint("userId")
 
 	if userID == 0 {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
@@ -57,9 +57,9 @@ func (c *RecordController) Get(ctx *gin.Context) {
 }
 
 func (c *RecordController) Delete(ctx *gin.Context) {
-	userID := ctx.GetUint64("userId")
+	userID := ctx.GetUint("userId")
 	idStr := ctx.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
+	id, err := strconv.ParseUint(idStr, 10, 32)
 
 	if err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, err)
@@ -67,7 +67,7 @@ func (c *RecordController) Delete(ctx *gin.Context) {
 	}
 
 	err = c.recordService.Delete(record.DeleteRecordRequest{
-		ID:     id,
+		ID:     uint(id),
 		UserID: userID,
 	})
 

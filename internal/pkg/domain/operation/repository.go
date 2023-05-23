@@ -2,7 +2,7 @@ package operation
 
 type Repository interface {
 	FindAll() ([]Operation, error)
-	FindByID(id uint64) (Operation, error)
+	FindByID(id uint) (Operation, error)
 }
 
 var operations = []Operation{
@@ -40,7 +40,7 @@ func NewRepository() Repository {
 	return &repository{}
 }
 
-func (r *repository) FindByID(id uint64) (Operation, error) {
+func (r *repository) FindByID(id uint) (Operation, error) {
 	for _, operation := range operations {
 		if operation.ID == id {
 			return operation, nil

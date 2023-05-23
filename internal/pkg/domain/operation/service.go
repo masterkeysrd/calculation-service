@@ -3,7 +3,7 @@ package operation
 import "go.uber.org/dig"
 
 type OperationResponse struct {
-	ID   uint64        `json:"id"`
+	ID   uint          `json:"id"`
 	Type OperationType `json:"type"`
 	Cost float64       `json:"cost"`
 }
@@ -12,7 +12,7 @@ type ListOperationsResponse struct {
 }
 
 type Service interface {
-	Get(id uint64) (*OperationResponse, error)
+	Get(id uint) (*OperationResponse, error)
 	List() (*ListOperationsResponse, error)
 }
 
@@ -31,7 +31,7 @@ func NewOperationService(params OperationServiceParams) Service {
 	}
 }
 
-func (s *service) Get(id uint64) (*OperationResponse, error) {
+func (s *service) Get(id uint) (*OperationResponse, error) {
 	operation, err := s.repository.FindByID(id)
 	if err != nil {
 		return nil, err

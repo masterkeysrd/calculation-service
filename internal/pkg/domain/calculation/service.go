@@ -15,13 +15,13 @@ type Service interface {
 }
 
 type CalculateRequest struct {
-	UserID      uint64   `json:"userId"`
-	OperationId uint64   `json:"operationId" binding:"required" validate:"required"`
+	UserID      uint     `json:"userId"`
+	OperationId uint     `json:"operationId" binding:"required" validate:"required"`
 	Arguments   []string `json:"arguments" binding:"required" validate:"required"`
 }
 
 type CalculateResponse struct {
-	RecordID    uint64    `json:"recordId"`
+	RecordID    uint      `json:"recordId"`
 	Amount      float64   `json:"amount"`
 	UserBalance float64   `json:"userBalance"`
 	Result      string    `json:"result"`

@@ -3,9 +3,9 @@ package user
 import "github.com/masterkeysrd/calculation-service/internal/pkg/infra/security/hash"
 
 type User struct {
-	ID       uint64
+	ID       uint
 	UserName string `validate:"required,email"`
-	Password string `validate:"required,min=8,max=32"`
+	Password string `validate:"required"`
 }
 
 func (u *User) ComparePassword(password string) error {

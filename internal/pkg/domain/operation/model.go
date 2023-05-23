@@ -1,7 +1,7 @@
 package operation
 
 type Operation struct {
-	ID   uint64        `json:"id"`
+	ID   uint          `json:"id"`
 	Type OperationType `json:"type"`
 	Cost float64       `json:"cost"`
 }

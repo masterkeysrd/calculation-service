@@ -3,8 +3,8 @@ package balance
 import "time"
 
 type Balance struct {
-	ID        uint64  `json:"id"`
-	UserID    uint64  `json:"user_id"`
+	ID        uint    `json:"id"`
+	UserID    uint    `json:"user_id"`
 	Amount    float64 `json:"amount"`
 	InFlight  float64 `json:"in_flight"`
 	CreatedAt time.Time
@@ -13,7 +13,7 @@ type Balance struct {
 }
 
 type NewBalanceInput struct {
-	UserID uint64
+	UserID uint
 	Amount float64
 }
 

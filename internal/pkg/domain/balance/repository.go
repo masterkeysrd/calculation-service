@@ -13,7 +13,7 @@ var (
 )
 
 type Repository interface {
-	FindByUserID(userID uint64) (*Balance, error)
+	FindByUserID(userID uint) (*Balance, error)
 	Create(balance *Balance) error
 	Update(balance *Balance) error
 	Delete(balance *Balance) error
@@ -25,7 +25,7 @@ func NewRepository() Repository {
 	return &repository{}
 }
 
-func (r *repository) FindByUserID(userID uint64) (*Balance, error) {
+func (r *repository) FindByUserID(userID uint) (*Balance, error) {
 	for _, balance := range balances {
 		if balance.UserID == userID {
 			return &balance, nil

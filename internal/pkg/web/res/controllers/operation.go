@@ -51,7 +51,7 @@ func (c *OperationController) Get(ctx *gin.Context) {
 		})
 	}
 
-	operation, err := c.service.Get(id)
+	operation, err := c.service.Get(uint(id))
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,

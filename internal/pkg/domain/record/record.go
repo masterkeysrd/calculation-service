@@ -3,9 +3,9 @@ package record
 import "time"
 
 type Record struct {
-	ID          uint64
-	UserID      uint64
-	OperationID uint64
+	ID          uint
+	UserID      uint
+	OperationID uint
 	Amount      float64
 	UserBalance float64
 	Result      string
@@ -13,8 +13,8 @@ type Record struct {
 }
 
 type NewRecordInput struct {
-	UserID      uint64
-	OperationID uint64
+	UserID      uint
+	OperationID uint
 	Amount      float64
 	UserBalance float64
 	Result      string
