@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 
+	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/persistence/loader"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/persistence/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -19,6 +20,13 @@ func NewDatabase(config *Config) *gorm.DB {
 
 	database.AutoMigrate(&models.User{})
 	database.AutoMigrate(&models.Balance{})
+	database.AutoMigrate(&models.Operation{})
+
+	err = loader.LoadDefaultOperations(database)
+	if err != nil {
+		panic(err)
+	}
+
 	return database
 }
 

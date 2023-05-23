@@ -8,7 +8,7 @@ type OperationResponse struct {
 	Cost float64       `json:"cost"`
 }
 type ListOperationsResponse struct {
-	Data []OperationResponse `json:"data"`
+	Data []*OperationResponse `json:"data"`
 }
 
 type Service interface {
@@ -32,7 +32,7 @@ func NewOperationService(params OperationServiceParams) Service {
 }
 
 func (s *service) Get(id uint) (*OperationResponse, error) {
-	operation, err := s.repository.FindByID(id)
+	operation, err := s.repository.Get(id)
 	if err != nil {
 		return nil, err
 	}
@@ -45,14 +45,15 @@ func (s *service) Get(id uint) (*OperationResponse, error) {
 }
 
 func (s *service) List() (*ListOperationsResponse, error) {
-	operations, err := s.repository.FindAll()
+	operations, err := s.repository.List()
 	if err != nil {
 		return nil, err
 	}
 
-	var operationsResponse []OperationResponse
+	var operationsResponse []*OperationResponse
 	for _, operation := range operations {
-		operationsResponse = append(operationsResponse, OperationResponse(operation))
+		op := OperationResponse(*operation)
+		operationsResponse = append(operationsResponse, &op)
 	}
 
 	return &ListOperationsResponse{

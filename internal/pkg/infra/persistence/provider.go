@@ -15,8 +15,11 @@ func RegisterProviders(container *dig.Container) error {
 }
 
 func registerRepositories(container *dig.Container) error {
-	// Register userRepository
 	if err := container.Provide(repositories.NewUserRepository); err != nil {
+		return err
+	}
+
+	if err := container.Provide(repositories.NewOperationRepository); err != nil {
 		return err
 	}
 

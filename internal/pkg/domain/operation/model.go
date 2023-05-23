@@ -13,5 +13,6 @@ const (
 	OperationTypeSubtraction    OperationType = "subtraction"
 	OperationTypeMultiplication OperationType = "multiplication"
 	OperationTypeDivision       OperationType = "division"
+	OperationTypeSquareRoot     OperationType = "square_root"
 	OperationTypeRandomString   OperationType = "random_string"
 )
