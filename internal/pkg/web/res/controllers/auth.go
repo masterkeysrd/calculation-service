@@ -48,7 +48,7 @@ func (c *AuthController) SignUp(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, gin.H{})
+	ctx.JSON(http.StatusNoContent, nil)
 }
 
 func (c *AuthController) SignIn(ctx *gin.Context) {
