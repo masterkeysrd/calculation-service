@@ -24,7 +24,7 @@ type UserResponse struct {
 
 type UserBalanceResponse struct {
 	Amount         float64 `json:"amount"`
-	AmountInFlight float64 `json:"amount_in_flight"`
+	AmountInFlight float64 `json:"amountInFlight"`
 }
 
 type Service interface {

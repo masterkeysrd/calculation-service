@@ -8,7 +8,7 @@ import (
 )
 
 func addition(arguments []string) (string, error) {
-	numbers, err := parseArguments(arguments)
+	numbers, err := parseArguments(arguments, 2)
 	if err != nil {
 		return "", err
 	}
@@ -20,7 +20,7 @@ func addition(arguments []string) (string, error) {
 }
 
 func subtraction(arguments []string) (string, error) {
-	numbers, err := parseArguments(arguments)
+	numbers, err := parseArguments(arguments, 2)
 	if err != nil {
 		return "", err
 	}
@@ -32,7 +32,7 @@ func subtraction(arguments []string) (string, error) {
 }
 
 func multiplication(arguments []string) (string, error) {
-	numbers, err := parseArguments(arguments)
+	numbers, err := parseArguments(arguments, 2)
 	if err != nil {
 		return "", err
 	}
@@ -44,7 +44,7 @@ func multiplication(arguments []string) (string, error) {
 }
 
 func division(arguments []string) (string, error) {
-	numbers, err := parseArguments(arguments)
+	numbers, err := parseArguments(arguments, 2)
 	if err != nil {
 		return "", err
 	}
@@ -55,26 +55,34 @@ func division(arguments []string) (string, error) {
 	return strconv.FormatFloat(number1/number2, 'f', -1, 64), nil
 }
 
-func parseArguments(arguments []string) ([]float64, error) {
-	if len(arguments) < 2 {
-		return nil, errors.New("invalid number of arguments, expected to have 2")
-	}
-
-	if len(arguments) > 2 {
-		return nil, errors.New("invalid number of arguments, expected to have 2")
-	}
-
-	number1, err := strconv.ParseFloat(arguments[0], 64)
+func squareRoot(arguments []string) (string, error) {
+	numbers, err := parseArguments(arguments, 1)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	number2, err := strconv.ParseFloat(arguments[1], 64)
-	if err != nil {
-		return nil, err
+	number1 := numbers[0]
+
+	return strconv.FormatFloat(number1*number1, 'f', -1, 64), nil
+}
+
+func parseArguments(arguments []string, n int) ([]float64, error) {
+	var numbers []float64
+
+	if len(arguments) != n {
+		return nil, errors.New("invalid number of arguments")
 	}
 
-	return []float64{number1, number2}, nil
+	for _, argument := range arguments {
+		number, err := strconv.ParseFloat(argument, 64)
+		if err != nil {
+			return nil, err
+		}
+
+		numbers = append(numbers, number)
+	}
+
+	return numbers, nil
 }
 
 func performOperation(operationType operation.OperationType, arguments []string) (string, error) {
@@ -87,6 +95,8 @@ func performOperation(operationType operation.OperationType, arguments []string)
 		return multiplication(arguments)
 	case operation.OperationTypeDivision:
 		return division(arguments)
+	case operation.OperationTypeSquareRoot:
+		return squareRoot(arguments)
 	default:
 		return "", errors.New("operation not supported")
 	}
