@@ -20,7 +20,7 @@ func NewUserRepository(db *gorm.DB) user.Repository {
 func (r *userRepository) FindByID(id uint) (*user.User, error) {
 	var u models.User
 
-	err := r.db.Model(&models.User{}).Preload("Balance").First(&u, id).Error
+	err := r.db.Joins("Balance").First(&u, id).Error
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, user.ErrUserNotFound
@@ -35,7 +35,7 @@ func (r *userRepository) FindByID(id uint) (*user.User, error) {
 
 func (r *userRepository) FindByUserName(userName string) (*user.User, error) {
 	var u models.User
-	err := r.db.Model(&models.User{}).Preload("Balance").Where("username = ?", userName).First(&u).Error
+	err := r.db.Joins("Balance").Where("username = ?", userName).First(&u).Error
 
 	fmt.Println("FindByUserName user.Balance.Amount=", u.Balance.Amount)
 
