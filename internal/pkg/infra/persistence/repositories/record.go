@@ -2,16 +2,27 @@ package repositories
 
 import (
 	rcd "github.com/masterkeysrd/calculation-service/internal/pkg/domain/record"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/common/pagination"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/persistence/clauses"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/persistence/models"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/persistence/scopes"
 	"gorm.io/gorm"
 )
 
+var (
+	textSearchFields = clauses.Fields{"operation_type", "amount", "user_balance", "result"}
+)
+
 type recordRepository struct {
-	db *gorm.DB
+	db       *gorm.DB
+	searcher clauses.TextSearcher
 }
 
 func NewRecordRepository(db *gorm.DB) rcd.Repository {
-	return &recordRepository{db: db}
+	return &recordRepository{
+		db:       db,
+		searcher: clauses.NewTextSearcher(textSearchFields),
+	}
 }
 
 func (r *recordRepository) GetWithUserID(userID uint, id uint) (*rcd.Record, error) {
@@ -21,22 +32,42 @@ func (r *recordRepository) GetWithUserID(userID uint, id uint) (*rcd.Record, err
 		return nil, err
 	}
 
-	return mapModelToRecord(&record), nil
+	result := mapModelToRecord(&record)
+	return &result, nil
 }
 
-func (r *recordRepository) ListWithUserID(userID uint) ([]*rcd.Record, error) {
-	var records []models.Record
+func (r *recordRepository) List(request rcd.ListRecordsInput, pageable pagination.Pageable) (pagination.Page[rcd.Record], error) {
+	var total int64
+	var records []*models.Record
 
-	if err := r.db.Joins("Operation").Where("user_id = ?", userID).Find(&records).Error; err != nil {
-		return nil, err
+	searchClause := r.searcher.Search(request)
+	userIdScope := scopes.UserID(request.UserID)
+
+	paginator := scopes.NewPaginator(
+		r.db.
+			Joins("Operation").
+			Scopes(userIdScope).
+			Clauses(searchClause),
+	)
+
+	db := r.db.Joins("Operation").
+		Scopes(
+			paginator.Paginate(scopes.PaginateOptions{
+				Total:    &total,
+				Value:    &records,
+				Pageable: pageable,
+			}),
+			userIdScope,
+		).
+		Clauses(searchClause).
+		Find(&records)
+
+	if db.Error != nil {
+		return nil, db.Error
 	}
 
-	var recordList []*rcd.Record
-	for _, record := range records {
-		recordList = append(recordList, mapModelToRecord(&record))
-	}
-
-	return recordList, nil
+	page := pagination.NewPage(records, pageable, total)
+	return pagination.MapPage(page, mapModelToRecord), nil
 }
 
 func (r *recordRepository) Create(record *rcd.Record) error {
@@ -66,8 +97,8 @@ func (r *recordRepository) Delete(record *rcd.Record) error {
 	return nil
 }
 
-func mapModelToRecord(model *models.Record) *rcd.Record {
-	return &rcd.Record{
+func mapModelToRecord(model *models.Record) rcd.Record {
+	return rcd.Record{
 		ID:     model.ID,
 		UserID: model.UserID,
 		Operation: rcd.RecordOperation{
