@@ -2,52 +2,16 @@ package record
 
 import (
 	"errors"
-	"time"
 
 	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/common/pagination"
-	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/common/search"
 	"go.uber.org/dig"
 )
 
 type Service interface {
 	Get(GetRecordRequest) (*RecordResponse, error)
-	List(input ListRecordsInput, pageable pagination.Pageable) (pagination.Page[RecordResponse], error)
+	List(ListRecordsRequest) (pagination.Page[RecordResponse], error)
 	Create(CreateRecordRequest) (*RecordResponse, error)
 	Delete(DeleteRecordRequest) error
-}
-
-type ListRecordsInput struct {
-	search.Searchable
-	UserID uint `json:"userId"`
-}
-
-type GetRecordRequest struct {
-	UserID uint
-	ID     uint
-}
-
-type RecordResponse struct {
-	ID            uint      `json:"id"`
-	UserID        uint      `json:"userId"`
-	OperationID   uint      `json:"operationId"`
-	OperationType string    `json:"operationType"`
-	Amount        float64   `json:"amount"`
-	UserBalance   float64   `json:"userBalance"`
-	Result        string    `json:"result"`
-	CreatedAt     time.Time `json:"date"`
-}
-
-type CreateRecordRequest struct {
-	UserID      uint    `json:"userId"`
-	OperationID uint    `json:"operationId"`
-	Amount      float64 `json:"amount"`
-	UserBalance float64 `json:"userBalance"`
-	Result      string  `json:"result"`
-}
-
-type DeleteRecordRequest struct {
-	ID     uint
-	UserID uint
 }
 
 type recordService struct {
@@ -75,8 +39,8 @@ func (s *recordService) Get(request GetRecordRequest) (*RecordResponse, error) {
 	return &response, nil
 }
 
-func (s *recordService) List(input ListRecordsInput, pageable pagination.Pageable) (pagination.Page[RecordResponse], error) {
-	page, err := s.repository.List(input, pageable)
+func (s *recordService) List(request ListRecordsRequest) (pagination.Page[RecordResponse], error) {
+	page, err := s.repository.List(request)
 	if err != nil {
 		return nil, err
 	}

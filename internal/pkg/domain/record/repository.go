@@ -6,7 +6,7 @@ import (
 
 type Repository interface {
 	GetWithUserID(userID uint, id uint) (*Record, error)
-	List(request ListRecordsInput, pageable pagination.Pageable) (pagination.Page[Record], error)
+	List(request ListRecordsRequest) (pagination.Page[Record], error)
 	Create(record *Record) error
 	Delete(record *Record) error
 }
