@@ -1,12 +1,14 @@
 package calculation
 
 import (
+	"errors"
 	"time"
 
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/balance"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/operation"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/record"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/user"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/random"
 	"go.uber.org/dig"
 )
 
@@ -30,6 +32,7 @@ type CalculateResponse struct {
 
 type ServiceParams struct {
 	dig.In
+	RandomClient     random.Client
 	UserService      user.Service
 	RecordService    record.Service
 	BalanceService   balance.Service
@@ -37,6 +40,7 @@ type ServiceParams struct {
 }
 
 type service struct {
+	randomClient     random.Client
 	userService      user.Service
 	recordService    record.Service
 	balanceService   balance.Service
@@ -49,6 +53,7 @@ func NewService(params ServiceParams) Service {
 		recordService:    params.RecordService,
 		balanceService:   params.BalanceService,
 		operationService: params.OperationService,
+		randomClient:     params.RandomClient,
 	}
 }
 
@@ -69,7 +74,7 @@ func (s *service) Calculate(request CalculateRequest) (*CalculateResponse, error
 		return nil, err
 	}
 
-	result, err := performOperation(operation.Type, request.Arguments)
+	result, err := s.performOperation(operation.Type, request.Arguments)
 	if err != nil {
 		s.balanceService.Release(transaction)
 		return nil, err
@@ -101,5 +106,27 @@ func (s *service) Calculate(request CalculateRequest) (*CalculateResponse, error
 		Result:      result,
 		Date:        record.CreatedAt,
 	}, nil
+}
 
+func (s *service) performOperation(op operation.OperationType, arguments []string) (string, error) {
+	if op == operation.OperationTypeRandomString {
+		return s.randomString()
+	}
+
+	return performOperation(op, arguments)
+}
+
+func (s *service) randomString() (string, error) {
+	randomOperation := random.NewGenerateStringOperation(8)
+	result, err := s.randomClient.GenerateRandom(randomOperation)
+
+	if err != nil {
+		return "", err
+	}
+
+	if len(result.GetData()) == 0 {
+		return "", errors.New("generated random string data is empty")
+	}
+
+	return result.GetData()[0].(string), nil
 }
