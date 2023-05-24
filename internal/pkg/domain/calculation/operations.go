@@ -2,6 +2,7 @@ package calculation
 
 import (
 	"errors"
+	"math"
 	"strconv"
 
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/operation"
@@ -63,13 +64,13 @@ func squareRoot(arguments []string) (string, error) {
 
 	number1 := numbers[0]
 
-	return strconv.FormatFloat(number1*number1, 'f', -1, 64), nil
+	return strconv.FormatFloat(math.Sqrt(number1), 'f', -1, 64), nil
 }
 
 func parseArguments(arguments []string, n int) ([]float64, error) {
 	var numbers []float64
 
-	if len(arguments) != n {
+	if len(arguments) < n {
 		return nil, errors.New("invalid number of arguments")
 	}
 
