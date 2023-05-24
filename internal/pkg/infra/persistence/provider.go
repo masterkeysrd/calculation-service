@@ -6,7 +6,6 @@ import (
 )
 
 func RegisterProviders(container *dig.Container) error {
-	// Register repositories
 	if err := registerRepositories(container); err != nil {
 		return err
 	}
