@@ -36,7 +36,7 @@ func (r *recordRepository) GetWithUserID(userID uint, id uint) (*rcd.Record, err
 	return &result, nil
 }
 
-func (r *recordRepository) List(request rcd.ListRecordsInput, pageable pagination.Pageable) (pagination.Page[rcd.Record], error) {
+func (r *recordRepository) List(request rcd.ListRecordsRequest) (pagination.Page[rcd.Record], error) {
 	var total int64
 	var records []*models.Record
 
@@ -55,7 +55,7 @@ func (r *recordRepository) List(request rcd.ListRecordsInput, pageable paginatio
 			paginator.Paginate(scopes.PaginateOptions{
 				Total:    &total,
 				Value:    &records,
-				Pageable: pageable,
+				Pageable: request,
 			}),
 			userIdScope,
 		).
@@ -66,7 +66,7 @@ func (r *recordRepository) List(request rcd.ListRecordsInput, pageable paginatio
 		return nil, db.Error
 	}
 
-	page := pagination.NewPage(records, pageable, total)
+	page := pagination.NewPage(records, request, total)
 	return pagination.MapPage(page, mapModelToRecord), nil
 }
 

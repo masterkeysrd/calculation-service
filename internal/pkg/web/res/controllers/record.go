@@ -52,12 +52,13 @@ func (c *RecordController) List(ctx *gin.Context) {
 		return
 	}
 
-	request := record.ListRecordsInput{
+	request := record.ListRecordsRequest{
 		UserID:     userID,
 		Searchable: search.NewSearchable(searchable),
+		Pageable:   pagination.NewPageable(pageable),
 	}
 
-	result, err := c.recordService.List(request, pagination.NewPageable(pageable))
+	result, err := c.recordService.List(request)
 
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
