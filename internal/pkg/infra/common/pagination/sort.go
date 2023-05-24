@@ -10,7 +10,7 @@ type sort struct {
 
 func NewSort(s string) Sort {
 	if s == "" {
-		s = "id"
+		s = "id desc"
 	}
 
 	return &sort{
