@@ -4,22 +4,21 @@ import (
 	"errors"
 	"time"
 
+	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/common/pagination"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/common/search"
 	"go.uber.org/dig"
 )
 
 type Service interface {
 	Get(GetRecordRequest) (*RecordResponse, error)
-	List(ListRecordRequest) (*ListRecordResponse, error)
+	List(input ListRecordsInput, pageable pagination.Pageable) (pagination.Page[RecordResponse], error)
 	Create(CreateRecordRequest) (*RecordResponse, error)
 	Delete(DeleteRecordRequest) error
 }
 
-type ListRecordRequest struct {
-	UserID uint
-}
-
-type ListRecordResponse struct {
-	Data []*RecordResponse `json:"data"`
+type ListRecordsInput struct {
+	search.Searchable
+	UserID uint `json:"userId"`
 }
 
 type GetRecordRequest struct {
@@ -47,8 +46,8 @@ type CreateRecordRequest struct {
 }
 
 type DeleteRecordRequest struct {
-	UserID uint
 	ID     uint
+	UserID uint
 }
 
 type recordService struct {
@@ -72,23 +71,17 @@ func (s *recordService) Get(request GetRecordRequest) (*RecordResponse, error) {
 		return nil, err
 	}
 
-	return mapRecordToResponse(record), nil
+	response := mapRecordToResponse(*record)
+	return &response, nil
 }
 
-func (s *recordService) List(request ListRecordRequest) (*ListRecordResponse, error) {
-	records, err := s.repository.ListWithUserID(request.UserID)
+func (s *recordService) List(input ListRecordsInput, pageable pagination.Pageable) (pagination.Page[RecordResponse], error) {
+	page, err := s.repository.List(input, pageable)
 	if err != nil {
 		return nil, err
 	}
 
-	result := []*RecordResponse{}
-	for _, record := range records {
-		result = append(result, mapRecordToResponse(record))
-	}
-
-	return &ListRecordResponse{
-		Data: result,
-	}, nil
+	return pagination.MapPage(page, mapRecordToResponse), nil
 }
 
 func (s *recordService) Create(request CreateRecordRequest) (*RecordResponse, error) {
@@ -101,7 +94,8 @@ func (s *recordService) Create(request CreateRecordRequest) (*RecordResponse, er
 		return nil, err
 	}
 
-	return mapRecordToResponse(record), nil
+	response := mapRecordToResponse(*record)
+	return &response, nil
 }
 
 func (s *recordService) Delete(request DeleteRecordRequest) error {
@@ -117,8 +111,8 @@ func (s *recordService) Delete(request DeleteRecordRequest) error {
 	return s.repository.Delete(record)
 }
 
-func mapRecordToResponse(record *Record) *RecordResponse {
-	return &RecordResponse{
+func mapRecordToResponse(record Record) RecordResponse {
+	return RecordResponse{
 		ID:            record.ID,
 		UserID:        record.UserID,
 		OperationID:   record.Operation.ID,

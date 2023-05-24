@@ -6,6 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/record"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/common/pagination"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/common/search"
 	"go.uber.org/dig"
 )
 
@@ -38,16 +40,31 @@ func (c *RecordController) List(ctx *gin.Context) {
 		return
 	}
 
-	records, err := c.recordService.List(record.ListRecordRequest{
-		UserID: userID,
-	})
+	var pageable pagination.PageableRequest
+	if err := ctx.Bind(&pageable); err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	var searchable search.SearchableRequest
+	if err := ctx.Bind(&searchable); err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	request := record.ListRecordsInput{
+		UserID:     userID,
+		Searchable: search.NewSearchable(searchable),
+	}
+
+	result, err := c.recordService.List(request, pagination.NewPageable(pageable))
 
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, records)
+	ctx.JSON(http.StatusOK, result.ToResponse())
 }
 
 func (c *RecordController) Get(ctx *gin.Context) {
