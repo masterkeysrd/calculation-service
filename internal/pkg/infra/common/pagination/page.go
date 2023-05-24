@@ -4,12 +4,14 @@ import "math"
 
 type PageResponse[T any] struct {
 	Content    []T `json:"items"`
+	PageNumber int `json:"page_number"`
 	TotalCount int `json:"total_count"`
 	TotalPages int `json:"total_pages"`
 }
 
 type Page[T any] interface {
 	GetContent() []T
+	GetPageNumber() int
 	GetPageable() Pageable
 	GetTotalCount() int64
 	GetTotalPages() int
@@ -42,6 +44,10 @@ func (p page[T]) GetPageable() Pageable {
 	return p.pageable
 }
 
+func (p page[T]) GetPageNumber() int {
+	return p.pageable.GetPageNumber()
+}
+
 func (p page[T]) GetTotalCount() int64 {
 	return p.totalCount
 }
@@ -53,6 +59,7 @@ func (p page[T]) GetTotalPages() int {
 func (p page[T]) ToResponse() *PageResponse[T] {
 	return &PageResponse[T]{
 		Content:    p.GetContent(),
+		PageNumber: p.GetPageNumber(),
 		TotalCount: int(p.GetTotalCount()),
 		TotalPages: p.GetTotalPages(),
 	}
