@@ -8,9 +8,9 @@ import (
 )
 
 type Service interface {
-	Get(GetRecordRequest) (*RecordResponse, error)
+	Get(GetRecordRequest) (RecordResponse, error)
 	List(ListRecordsRequest) (pagination.Page[RecordResponse], error)
-	Create(CreateRecordRequest) (*RecordResponse, error)
+	Create(CreateRecordRequest) (RecordResponse, error)
 	Delete(DeleteRecordRequest) error
 }
 
@@ -29,14 +29,13 @@ func NewService(params RecordServiceParams) Service {
 	}
 }
 
-func (s *recordService) Get(request GetRecordRequest) (*RecordResponse, error) {
+func (s *recordService) Get(request GetRecordRequest) (RecordResponse, error) {
 	record, err := s.repository.GetWithUserID(request.UserID, request.ID)
 	if err != nil {
-		return nil, err
+		return RecordResponse{}, err
 	}
 
-	response := mapRecordToResponse(*record)
-	return &response, nil
+	return mapRecordToResponse(*record), nil
 }
 
 func (s *recordService) List(request ListRecordsRequest) (pagination.Page[RecordResponse], error) {
@@ -48,18 +47,17 @@ func (s *recordService) List(request ListRecordsRequest) (pagination.Page[Record
 	return pagination.MapPage(page, mapRecordToResponse), nil
 }
 
-func (s *recordService) Create(request CreateRecordRequest) (*RecordResponse, error) {
+func (s *recordService) Create(request CreateRecordRequest) (RecordResponse, error) {
 	record := NewRecord(
 		NewRecordInput(request),
 	)
 
 	err := s.repository.Create(record)
 	if err != nil {
-		return nil, err
+		return RecordResponse{}, err
 	}
 
-	response := mapRecordToResponse(*record)
-	return &response, nil
+	return mapRecordToResponse(*record), nil
 }
 
 func (s *recordService) Delete(request DeleteRecordRequest) error {
@@ -73,17 +71,4 @@ func (s *recordService) Delete(request DeleteRecordRequest) error {
 	}
 
 	return s.repository.Delete(record)
-}
-
-func mapRecordToResponse(record Record) RecordResponse {
-	return RecordResponse{
-		ID:            record.ID,
-		UserID:        record.UserID,
-		OperationID:   record.Operation.ID,
-		OperationType: record.Operation.Type,
-		Amount:        record.Amount,
-		UserBalance:   record.UserBalance,
-		Result:        record.Result,
-		CreatedAt:     record.CreatedAt,
-	}
 }
