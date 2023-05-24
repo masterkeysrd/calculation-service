@@ -15,5 +15,9 @@ func RegisterProviders(container *dig.Container) error {
 		return err
 	}
 
+	if err := container.Provide(GetRandomConfig); err != nil {
+		return err
+	}
+
 	return nil
 }
