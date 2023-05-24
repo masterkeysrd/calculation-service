@@ -1,7 +1,7 @@
 package pagination
 
 type Sort interface {
-	GetSort() string
+	ToString() string
 }
 
 type sort struct {
@@ -18,6 +18,6 @@ func NewSort(s string) Sort {
 	}
 }
 
-func (s *sort) GetSort() string {
+func (s *sort) ToString() string {
 	return s.sort
 }
