@@ -6,8 +6,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/record"
-	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/common/pagination"
-	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/common/search"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/http/errors"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/web/res/handlers"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/web/res/request"
 	"go.uber.org/dig"
 )
 
@@ -27,72 +28,52 @@ func NewRecordController(params RecordControllerParams) *RecordController {
 }
 
 func (c *RecordController) RegisterRoutes(router *gin.RouterGroup) {
-	router.GET("", c.List)
-	router.GET(":id", c.Get)
-	router.DELETE(":id", c.Delete)
+	router.GET("", handlers.HandleError(c.List, handlers.DefaultResponseOptions))
+	router.DELETE(":id", handlers.HandleError(c.Delete, handlers.ResponseOptions{
+		StatusCode: http.StatusNoContent,
+	}))
 }
 
-func (c *RecordController) List(ctx *gin.Context) {
-	userID := ctx.GetUint("userId")
-
-	if userID == 0 {
-		ctx.AbortWithStatus(http.StatusUnauthorized)
-		return
+func (c *RecordController) List(ctx *gin.Context) (interface{}, error) {
+	userID, err := request.UserID(ctx)
+	if err != nil {
+		return nil, err
 	}
 
-	var pageable pagination.PageableRequest
-	if err := ctx.Bind(&pageable); err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, err)
-		return
-	}
-
-	var searchable search.SearchableRequest
-	if err := ctx.Bind(&searchable); err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, err)
-		return
+	searchable, pageable, err := request.PageableAndSearchable(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	request := record.ListRecordsRequest{
 		UserID:     userID,
-		Searchable: search.NewSearchable(searchable),
-		Pageable:   pagination.NewPageable(pageable),
+		Searchable: searchable,
+		Pageable:   pageable,
 	}
 
 	result, err := c.recordService.List(request)
-
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, err)
-		return
+		return nil, err
 	}
 
-	ctx.JSON(http.StatusOK, result.ToResponse())
+	return result.ToResponse(), nil
 }
 
-func (c *RecordController) Get(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, gin.H{
-		"message": "Hello World",
-	})
-}
+func (c *RecordController) Delete(ctx *gin.Context) (interface{}, error) {
+	userID, err := request.UserID(ctx)
 
-func (c *RecordController) Delete(ctx *gin.Context) {
-	userID := ctx.GetUint("userId")
+	if err != nil {
+		return nil, err
+	}
+
 	idStr := ctx.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
-
 	if err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, err)
-		return
+		return nil, errors.NewHTTPError(http.StatusBadRequest, "Invalid ID")
 	}
 
-	err = c.recordService.Delete(record.DeleteRecordRequest{
-		ID:     uint(id),
+	return nil, c.recordService.Delete(record.DeleteRecordRequest{
 		UserID: userID,
+		ID:     uint(id),
 	})
-
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	ctx.Status(http.StatusNoContent)
 }

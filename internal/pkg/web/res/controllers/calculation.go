@@ -1,10 +1,10 @@
 package controllers
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/calculation"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/web/res/handlers"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/web/res/request"
 	"go.uber.org/dig"
 )
 
@@ -24,30 +24,20 @@ func NewCalculationController(params CalculationControllerParams) *CalculationCo
 }
 
 func (c *CalculationController) RegisterRoutes(router *gin.RouterGroup) {
-	router.POST("/calculate", c.Calculate)
+	router.POST("/calculate", handlers.HandleError(c.Calculate, handlers.DefaultResponseOptions))
 }
 
-func (c *CalculationController) Calculate(ctx *gin.Context) {
-	userId := ctx.GetUint("userId")
-	var request calculation.CalculateRequest
-
-	if err := ctx.ShouldBindJSON(&request); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusBadRequest,
-			"message": err.Error(),
-		})
-		return
-	}
-
-	request.UserID = userId
-	response, err := c.calculationService.Calculate(request)
+func (c *CalculationController) Calculate(ctx *gin.Context) (interface{}, error) {
+	userID, err := request.UserID(ctx)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusBadRequest,
-			"message": err.Error(),
-		})
-		return
+		return nil, err
 	}
 
-	ctx.JSON(http.StatusOK, response)
+	var request calculation.CalculateRequest
+	if err := ctx.ShouldBindJSON(&request); err != nil {
+		return nil, err
+	}
+
+	request.UserID = userID
+	return c.calculationService.Calculate(request)
 }

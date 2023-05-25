@@ -1,13 +1,12 @@
 package controllers
 
 import (
-	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/operation"
-	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/common/pagination"
-	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/common/search"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/web/res/handlers"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/web/res/request"
 	"go.uber.org/dig"
 )
 
@@ -27,60 +26,35 @@ func NewOperationController(params OperationControllerParams) *OperationControll
 }
 
 func (c *OperationController) RegisterRoutes(group *gin.RouterGroup) {
-	group.GET("", c.List)
-	group.GET("/:id", c.Get)
+	group.GET("", handlers.HandleError(c.List, handlers.DefaultResponseOptions))
+	group.GET("/:id", handlers.HandleError(c.Get, handlers.DefaultResponseOptions))
 }
 
-func (c *OperationController) List(ctx *gin.Context) {
-	var pageable pagination.PageableRequest
+func (c *OperationController) List(ctx *gin.Context) (interface{}, error) {
+	searchable, pageable, err := request.PageableAndSearchable(ctx)
 
-	if err := ctx.ShouldBindQuery(&pageable); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusBadRequest,
-			"message": err.Error(),
-		})
-	}
-
-	var searchable search.SearchableRequest
-	if err := ctx.ShouldBindQuery(&searchable); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusBadRequest,
-			"message": err.Error(),
-		})
+	if err != nil {
+		return nil, err
 	}
 
 	page, err := c.service.List(operation.ListRequest{
-		Pageable:   pagination.NewPageable(pageable),
-		Searchable: search.NewSearchable(searchable),
+		Pageable:   pageable,
+		Searchable: searchable,
 	})
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusInternalServerError,
-			"message": err.Error(),
-		})
+		return nil, err
 	}
 
-	ctx.JSON(http.StatusOK, page.ToResponse())
+	return page.ToResponse(), nil
 }
 
-func (c *OperationController) Get(ctx *gin.Context) {
+func (c *OperationController) Get(ctx *gin.Context) (interface{}, error) {
 	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"code":    http.StatusBadRequest,
-			"message": err.Error(),
-		})
+		return nil, err
 	}
 
-	operation, err := c.service.Get(uint(id))
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
-			"code":    http.StatusInternalServerError,
-			"message": err.Error(),
-		})
-	}
-
-	ctx.JSON(http.StatusOK, operation)
+	return c.service.Get(uint(id))
 }

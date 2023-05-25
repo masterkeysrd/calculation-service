@@ -1,11 +1,10 @@
 package controllers
 
 import (
-	"fmt"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/user"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/web/res/handlers"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/web/res/request"
 	"go.uber.org/dig"
 )
 
@@ -25,81 +24,39 @@ func NewUserController(options UserControllerParams) *UserController {
 }
 
 func (c *UserController) RegisterRoutes(router *gin.RouterGroup) {
-	router.GET("me", c.FindMe)
-	router.DELETE("me", c.DeleteMe)
-	router.GET("me/balance", c.GetMyBalance)
+	router.GET("me", handlers.HandleError(c.FindMe, handlers.DefaultResponseOptions))
+	router.DELETE("me", handlers.HandleError(c.DeleteMe, handlers.NoContentResponseOptions))
+	router.GET("me/balance", handlers.HandleError(c.GetMyBalance, handlers.DefaultResponseOptions))
 }
 
-func (c *UserController) FindMe(ctx *gin.Context) {
-	userId := ctx.GetUint("userId")
-	fmt.Println("userId: ", userId)
-
-	if userId == 0 {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"code":    http.StatusUnauthorized,
-			"message": "Unauthorized",
-		})
-		return
-	}
-
-	user, err := c.service.Get(userId)
+func (c *UserController) FindMe(ctx *gin.Context) (interface{}, error) {
+	userId, err := request.UserID(ctx)
 
 	if err != nil {
-		ctx.JSON(400, gin.H{
-			"code":    400,
-			"message": err.Error(),
-		})
-		return
+		return nil, err
 	}
 
-	ctx.JSON(200, user)
+	return c.service.Get(userId)
 }
 
-func (c *UserController) DeleteMe(ctx *gin.Context) {
-	userId := ctx.GetUint("userId")
+func (c *UserController) DeleteMe(ctx *gin.Context) (interface{}, error) {
+	userId, err := request.UserID(ctx)
 
-	if userId == 0 {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"code":    http.StatusUnauthorized,
-			"message": "Unauthorized",
-		})
-		return
+	if err != nil {
+		return nil, err
 	}
 
-	err := c.service.Delete(user.DeleteUserRequest{
+	return nil, c.service.Delete(user.DeleteUserRequest{
 		UserID: userId,
 	})
-
-	if err != nil {
-		ctx.JSON(400, gin.H{
-			"code":    400,
-			"message": err.Error(),
-		})
-		return
-	}
-
-	ctx.JSON(http.StatusNoContent, nil)
 }
 
-func (c *UserController) GetMyBalance(ctx *gin.Context) {
-	userId := ctx.GetUint("userId")
+func (c *UserController) GetMyBalance(ctx *gin.Context) (interface{}, error) {
+	userId, err := request.UserID(ctx)
 
-	if userId == 0 {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"code":    http.StatusUnauthorized,
-			"message": "Unauthorized",
-		})
-		return
-	}
-
-	balance, err := c.service.GetBalance(userId)
 	if err != nil {
-		ctx.JSON(400, gin.H{
-			"code":    400,
-			"message": err.Error(),
-		})
-		return
+		return nil, err
 	}
 
-	ctx.JSON(200, balance)
+	return c.service.GetBalance(userId)
 }

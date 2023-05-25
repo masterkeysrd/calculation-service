@@ -1,10 +1,9 @@
 package controllers
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/auth"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/web/res/handlers"
 	"go.uber.org/dig"
 )
 
@@ -26,90 +25,38 @@ func NewAuthController(options AuthControllerParams) *AuthController {
 }
 
 func (c *AuthController) RegisterRoutes(group *gin.RouterGroup) {
-	group.POST("/sign-up", c.SignUp)
-	group.POST("/sign-in", c.SignIn)
-	group.POST("/sign-out", c.SignOut)
-	group.POST("/refresh", c.Refresh)
+	group.POST("/sign-up", handlers.HandleError(c.SignUp, handlers.NoContentResponseOptions))
+	group.POST("/sign-in", handlers.HandleError(c.SignIn, handlers.DefaultResponseOptions))
+	group.POST("/sign-out", handlers.HandleError(c.SignOut, handlers.NoContentResponseOptions))
 }
 
-func (c *AuthController) SignUp(ctx *gin.Context) {
+func (c *AuthController) SignUp(ctx *gin.Context) (interface{}, error) {
 	var request auth.SignUpRequest
 	if err := ctx.ShouldBind(&request); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
-		})
-		return
+		return nil, err
 	}
 
-	if err := c.service.SignUp(request); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
-		})
-		return
-	}
-
-	ctx.JSON(http.StatusNoContent, nil)
+	return nil, c.service.SignUp(request)
 }
 
-func (c *AuthController) SignIn(ctx *gin.Context) {
+func (c *AuthController) SignIn(ctx *gin.Context) (interface{}, error) {
 	var request auth.SignInRequest
 	if err := ctx.ShouldBind(&request); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
-		})
-		return
+		return nil, err
 	}
 
-	response, err := c.service.SignIn(request)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
-		})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, response)
+	return c.service.SignIn(request)
 }
 
-func (c *AuthController) SignOut(ctx *gin.Context) {
+func (c *AuthController) SignOut(ctx *gin.Context) (interface{}, error) {
 	var headers SignOutHeader
 	if err := ctx.BindHeader(&headers); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
-		})
-		return
+		return nil, err
 	}
 
 	request := auth.SignOutRequest{
 		AccessToken: headers.AccessToken,
 	}
 
-	if err := c.service.SignOut(request); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
-		})
-		return
-	}
-
-	ctx.JSON(http.StatusNoContent, gin.H{})
-}
-
-func (c *AuthController) Refresh(ctx *gin.Context) {
-	var request auth.RefreshRequest
-	if err := ctx.ShouldBind(&request); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
-		})
-		return
-	}
-
-	response, err := c.service.Refresh(request)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
-		})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, response)
+	return nil, c.service.SignOut(request)
 }
