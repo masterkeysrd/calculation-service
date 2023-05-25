@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"fmt"
+	"errors"
 
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/operation"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/common/pagination"
@@ -23,7 +23,7 @@ func NewOperationRepository(db *gorm.DB) operation.Repository {
 
 func (r *operationRepository) List(request operation.ListRequest) (pagination.Page[operation.Operation], error) {
 	var total int64
-	var rows []*models.Operation
+	var operations []*models.Operation
 
 	textSearch := clauses.NewTextSearcher(fields)
 	paginator := scopes.NewPaginator(r.db)
@@ -37,19 +37,25 @@ func (r *operationRepository) List(request operation.ListRequest) (pagination.Pa
 			}),
 		).
 		Clauses(textSearch.Search(request)).
-		Find(&rows).Error
+		Find(&operations).Error
 
 	if err != nil {
 		return nil, err
 	}
 
-	page := pagination.NewPage(rows, request, total)
+	page := pagination.NewPage(operations, request, total)
 	return pagination.MapPage(page, mapOperationToModel), nil
 }
 
 func (r *operationRepository) Get(id uint) (*operation.Operation, error) {
 	var op models.Operation
-	if err := r.db.First(&op, id).Error; err != nil {
+	err := r.db.First(&op, id).Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, operation.ErrOperationNotFound
+	}
+
+	if err != nil {
 		return nil, err
 	}
 
@@ -61,7 +67,6 @@ func (r *operationRepository) Get(id uint) (*operation.Operation, error) {
 }
 
 func mapOperationToModel(entity *models.Operation) operation.Operation {
-	fmt.Println("mapOperationToModel")
 	return operation.Operation{
 		ID:   entity.ID,
 		Type: operation.OperationType(entity.OperationType),

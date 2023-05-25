@@ -1,6 +1,8 @@
 package repositories
 
 import (
+	"errors"
+
 	rcd "github.com/masterkeysrd/calculation-service/internal/pkg/domain/record"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/common/pagination"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/persistence/clauses"
@@ -28,8 +30,10 @@ func NewRecordRepository(db *gorm.DB) rcd.Repository {
 func (r *recordRepository) GetWithUserID(userID uint, id uint) (*rcd.Record, error) {
 	var record models.Record
 
-	if err := r.db.Joins("Operation").Where("user_id = ? AND id = ?", userID, id).First(&r).Error; err != nil {
-		return nil, err
+	err := r.db.Joins("Operation").Where("user_id = ? AND records.id = ?", userID, id).First(&record).Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, rcd.ErrRecordNotFound
 	}
 
 	result := mapModelToRecord(&record)
@@ -90,7 +94,8 @@ func (r *recordRepository) Create(record *rcd.Record) error {
 }
 
 func (r *recordRepository) Delete(record *rcd.Record) error {
-	if err := r.db.Delete(&models.Record{}, record.ID).Error; err != nil {
+	var model models.Record
+	if err := r.db.Delete(&model, record.ID).Error; err != nil {
 		return err
 	}
 
