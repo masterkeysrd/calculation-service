@@ -1,8 +1,6 @@
 package record
 
 import (
-	"errors"
-
 	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/common/pagination"
 	"go.uber.org/dig"
 )
@@ -67,7 +65,7 @@ func (s *recordService) Delete(request DeleteRecordRequest) error {
 	}
 
 	if record == nil {
-		return errors.New("record not found")
+		return ErrRecordNotFound
 	}
 
 	return s.repository.Delete(record)

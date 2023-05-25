@@ -59,7 +59,7 @@ func TestUserService_FindByUserName(t *testing.T) {
 		{
 			name:  "should return a error when username is empty",
 			input: "",
-			err:   user.ErrUserNameRequired,
+			err:   user.ErrUserIDRequired,
 		},
 		{
 			name:  "should return a error when repository returns error",
@@ -207,7 +207,7 @@ func TestUserService_Delete(t *testing.T) {
 			input: user.DeleteUserRequest{
 				UserName: "",
 			},
-			err: user.ErrUserNameRequired,
+			err: user.ErrUserIDRequired,
 		},
 		{
 			name: "should return error when repository.FindByUserName returns error",

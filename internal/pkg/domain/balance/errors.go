@@ -1,7 +1,7 @@
 package balance
 
-import "errors"
+import "github.com/masterkeysrd/calculation-service/internal/pkg/infra/http/errors"
 
 var (
-	ErrInsufficientFunds = errors.New("insufficient funds")
+	ErrInsufficientFunds = errors.Forbidden("insufficient funds")
 )

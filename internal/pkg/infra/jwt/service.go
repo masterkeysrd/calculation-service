@@ -1,7 +1,6 @@
 package jwt
 
 import (
-	"errors"
 	"strconv"
 	"time"
 
@@ -131,7 +130,7 @@ func (s *service) ValidateToken(c *gin.Context) error {
 
 	userId, err := strconv.ParseUint(claims["sub"].(string), 10, 64)
 	if err != nil {
-		return errors.New("invalid user id")
+		return ErrInvalidUserID
 	}
 
 	c.Set("tokenId", claims["jti"])

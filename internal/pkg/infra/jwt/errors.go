@@ -1,9 +1,10 @@
 package jwt
 
-import "errors"
+import "github.com/masterkeysrd/calculation-service/internal/pkg/infra/http/errors"
 
 var (
-	ErrTokenIsNotProvided      = errors.New("bearer token is not provided")
-	ErrUnexpectedSigningMethod = errors.New("unexpected signing method")
-	ErrorInvalidToken          = errors.New("invalid token")
+	ErrInvalidUserID           = errors.BadRequest("invalid user id")
+	ErrorInvalidToken          = errors.Unauthorized("invalid token")
+	ErrTokenIsNotProvided      = errors.Unauthorized("token is not provided")
+	ErrUnexpectedSigningMethod = errors.InternalServerError("unexpected signing method")
 )

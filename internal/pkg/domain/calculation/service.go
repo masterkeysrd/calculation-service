@@ -1,7 +1,6 @@
 package calculation
 
 import (
-	"errors"
 	"time"
 
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/balance"
@@ -125,7 +124,7 @@ func (s *service) randomString() (string, error) {
 	}
 
 	if len(result.GetData()) == 0 {
-		return "", errors.New("generated random string data is empty")
+		return "", ErrRandomDataEmpty
 	}
 
 	return result.GetData()[0].(string), nil

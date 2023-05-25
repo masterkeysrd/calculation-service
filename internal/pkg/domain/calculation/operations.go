@@ -1,7 +1,6 @@
 package calculation
 
 import (
-	"errors"
 	"math"
 	"strconv"
 
@@ -16,8 +15,8 @@ func addition(arguments []string) (string, error) {
 
 	number1 := numbers[0]
 	number2 := numbers[1]
-
-	return strconv.FormatFloat(number1+number2, 'f', -1, 64), nil
+	result := number1 + number2
+	return formatNumber(result), nil
 }
 
 func subtraction(arguments []string) (string, error) {
@@ -28,8 +27,9 @@ func subtraction(arguments []string) (string, error) {
 
 	number1 := numbers[0]
 	number2 := numbers[1]
+	result := number1 - number2
 
-	return strconv.FormatFloat(number1-number2, 'f', -1, 64), nil
+	return formatNumber(result), nil
 }
 
 func multiplication(arguments []string) (string, error) {
@@ -40,8 +40,9 @@ func multiplication(arguments []string) (string, error) {
 
 	number1 := numbers[0]
 	number2 := numbers[1]
+	result := number1 * number2
 
-	return strconv.FormatFloat(number1*number2, 'f', -1, 64), nil
+	return formatNumber(result), nil
 }
 
 func division(arguments []string) (string, error) {
@@ -52,8 +53,9 @@ func division(arguments []string) (string, error) {
 
 	number1 := numbers[0]
 	number2 := numbers[1]
+	result := number1 / number2
 
-	return strconv.FormatFloat(number1/number2, 'f', -1, 64), nil
+	return formatNumber(result), nil
 }
 
 func squareRoot(arguments []string) (string, error) {
@@ -63,15 +65,16 @@ func squareRoot(arguments []string) (string, error) {
 	}
 
 	number1 := numbers[0]
+	result := math.Sqrt(number1)
 
-	return strconv.FormatFloat(math.Sqrt(number1), 'f', -1, 64), nil
+	return formatNumber(result), nil
 }
 
 func parseArguments(arguments []string, n int) ([]float64, error) {
 	var numbers []float64
 
 	if len(arguments) < n {
-		return nil, errors.New("invalid number of arguments")
+		return nil, ErrInvalidNumberOfArguments
 	}
 
 	for _, argument := range arguments {
@@ -99,6 +102,10 @@ func performOperation(operationType operation.OperationType, arguments []string)
 	case operation.OperationTypeSquareRoot:
 		return squareRoot(arguments)
 	default:
-		return "", errors.New("operation not supported")
+		return "", ErrOperationNotSupported
 	}
+}
+
+func formatNumber(number float64) string {
+	return strconv.FormatFloat(number, 'f', -1, 64)
 }

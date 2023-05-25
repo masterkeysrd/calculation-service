@@ -75,7 +75,7 @@ func (s service) Get(id uint) (*UserResponse, error) {
 
 func (s service) GetByUserName(userName string) (*UserResponse, error) {
 	if userName == "" {
-		return nil, ErrUserNameRequired
+		return nil, ErrUserIDRequired
 	}
 
 	user, err := s.repository.FindByUserName(userName)
@@ -110,7 +110,7 @@ func (s service) Create(request CreateUserRequest) error {
 
 func (s service) Delete(request DeleteUserRequest) error {
 	if request.UserID == 0 {
-		return ErrUserNameRequired
+		return ErrUserIDRequired
 	}
 
 	user, err := s.repository.FindByID(request.UserID)
