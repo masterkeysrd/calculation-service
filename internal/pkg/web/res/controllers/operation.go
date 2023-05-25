@@ -6,6 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/operation"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/common/pagination"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/common/search"
 	"go.uber.org/dig"
 )
 
@@ -30,7 +32,28 @@ func (c *OperationController) RegisterRoutes(group *gin.RouterGroup) {
 }
 
 func (c *OperationController) List(ctx *gin.Context) {
-	operations, err := c.service.List()
+	var pageable pagination.PageableRequest
+
+	if err := ctx.ShouldBindQuery(&pageable); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": err.Error(),
+		})
+	}
+
+	var searchable search.SearchableRequest
+	if err := ctx.ShouldBindQuery(&searchable); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": err.Error(),
+		})
+	}
+
+	page, err := c.service.List(operation.ListRequest{
+		Pageable:   pagination.NewPageable(pageable),
+		Searchable: search.NewSearchable(searchable),
+	})
+
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"code":    http.StatusInternalServerError,
@@ -38,7 +61,7 @@ func (c *OperationController) List(ctx *gin.Context) {
 		})
 	}
 
-	ctx.JSON(http.StatusOK, operations)
+	ctx.JSON(http.StatusOK, page.ToResponse())
 }
 
 func (c *OperationController) Get(ctx *gin.Context) {

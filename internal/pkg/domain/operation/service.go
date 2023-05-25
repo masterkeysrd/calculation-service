@@ -1,19 +1,13 @@
 package operation
 
-import "go.uber.org/dig"
-
-type OperationResponse struct {
-	ID   uint          `json:"id"`
-	Type OperationType `json:"type"`
-	Cost float64       `json:"cost"`
-}
-type ListOperationsResponse struct {
-	Data []*OperationResponse `json:"data"`
-}
+import (
+	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/common/pagination"
+	"go.uber.org/dig"
+)
 
 type Service interface {
 	Get(id uint) (*OperationResponse, error)
-	List() (*ListOperationsResponse, error)
+	List(ListRequest) (pagination.Page[OperationResponse], error)
 }
 
 type OperationServiceParams struct {
@@ -44,19 +38,11 @@ func (s *service) Get(id uint) (*OperationResponse, error) {
 	}, nil
 }
 
-func (s *service) List() (*ListOperationsResponse, error) {
-	operations, err := s.repository.List()
+func (s *service) List(request ListRequest) (pagination.Page[OperationResponse], error) {
+	operations, err := s.repository.List(request)
 	if err != nil {
 		return nil, err
 	}
 
-	var operationsResponse []*OperationResponse
-	for _, operation := range operations {
-		op := OperationResponse(*operation)
-		operationsResponse = append(operationsResponse, &op)
-	}
-
-	return &ListOperationsResponse{
-		Data: operationsResponse,
-	}, nil
+	return pagination.MapPage(operations, mapOperationToResponse), nil
 }
