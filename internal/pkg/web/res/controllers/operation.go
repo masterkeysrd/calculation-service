@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"strconv"
-
 	"github.com/gin-gonic/gin"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/operation"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/web/res/handlers"
@@ -50,7 +48,7 @@ func (c *OperationController) List(ctx *gin.Context) (interface{}, error) {
 }
 
 func (c *OperationController) Get(ctx *gin.Context) (interface{}, error) {
-	id, err := strconv.ParseUint(ctx.Param("id"), 10, 64)
+	id, err := request.ParamUint(ctx, "id")
 
 	if err != nil {
 		return nil, err

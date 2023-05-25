@@ -2,11 +2,9 @@ package controllers
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/record"
-	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/http/errors"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/web/res/handlers"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/web/res/request"
 	"go.uber.org/dig"
@@ -66,10 +64,9 @@ func (c *RecordController) Delete(ctx *gin.Context) (interface{}, error) {
 		return nil, err
 	}
 
-	idStr := ctx.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id, err := request.ParamUint(ctx, "id")
 	if err != nil {
-		return nil, errors.NewHTTPError(http.StatusBadRequest, "Invalid ID")
+		return nil, err
 	}
 
 	return nil, c.recordService.Delete(record.DeleteRecordRequest{
