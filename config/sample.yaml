@@ -1,0 +1,35 @@
+# This is a sample configuration file for the server
+application:
+  name: "calculation-service"
+  version: "1.0.0"
+  profile: "local"  # local, dev, prod
+
+# Server configuration
+server:
+  port: 8080
+  mode: "debug" # debug, test, release
+  useCors: true
+
+# Database configuration
+database:
+  host: "localhost"
+  port: 5432
+  name: "calculation-service-api"
+  username: "postgres"
+  password: "postgres"
+
+# JWT configuration
+# The values below are expressed in seconds
+jwt:
+  issuer: "calculation-service"
+  audience: "calculation-service"
+  secretKey: "secret"
+  accessTokenTTL: 3600
+  refreshTokenTTL: 86400
+
+services:
+# Random.org Service Configuration
+# Please register on https://api.random.org/dashboard and get your API key
+  random:
+    url: https://api.random.org/json-rpc/4/invoke
+    apiKey: ""

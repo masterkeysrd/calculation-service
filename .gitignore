@@ -27,3 +27,10 @@ tmp/
 
 # Output of IDEs
 .vscode
+
+# Docker deployment volumes
+deployments/docker/volumes/
+
+# Configuration files
+local.yaml
+local.yml

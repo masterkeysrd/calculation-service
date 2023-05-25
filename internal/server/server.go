@@ -1,6 +1,9 @@
 package server
 
 import (
+	"net/http"
+
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/web/res/common"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/web/res/controllers"
@@ -9,6 +12,7 @@ import (
 )
 
 type Server struct {
+	config                *Config
 	authController        *controllers.AuthController
 	userController        *controllers.UserController
 	jWTAuthMiddleware     middleware.JWTAuthMiddleware
@@ -19,6 +23,7 @@ type Server struct {
 
 type ServerParams struct {
 	dig.In
+	Config                *Config
 	AuthController        *controllers.AuthController
 	UserController        *controllers.UserController
 	JWTAuthMiddleware     middleware.JWTAuthMiddleware
@@ -29,6 +34,8 @@ type ServerParams struct {
 
 func NewServer(options ServerParams) *Server {
 	return &Server{
+		config: options.Config,
+
 		authController:        options.AuthController,
 		userController:        options.UserController,
 		operationController:   options.OperationController,
@@ -40,10 +47,40 @@ func NewServer(options ServerParams) *Server {
 }
 
 func (s *Server) Start() error {
-	r := gin.Default()
+	r := s.setup()
 	s.registerRoutes(r)
 
-	return r.Run(":8080")
+	server := &http.Server{
+		Addr:    ":" + s.config.Port,
+		Handler: r,
+	}
+
+	return server.ListenAndServe()
+}
+
+func (s *Server) setup() *gin.Engine {
+	if s.config.Mode != "" {
+		gin.SetMode(s.config.Mode)
+	}
+
+	r := gin.Default()
+
+	if s.config.UseCORS {
+		s.setupCORS(r)
+	}
+
+	return r
+}
+
+func (s *Server) setupCORS(r *gin.Engine) {
+	r.Use(cors.New(
+		cors.Config{
+			AllowOrigins:     []string{"*"},
+			AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+			AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+			AllowCredentials: true,
+		},
+	))
 }
 
 func (s *Server) registerRoutes(r *gin.Engine) {

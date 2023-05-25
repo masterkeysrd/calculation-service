@@ -1,14 +1,18 @@
 package config
 
 import (
+	"fmt"
+
 	"github.com/gookit/config/v2"
 	"github.com/gookit/config/v2/yaml"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/database"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/jwt"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/random"
+	"github.com/masterkeysrd/calculation-service/internal/server"
 )
 
 type Config struct {
+	Server   *server.Config   `mapstructure:"server"`
 	JWT      *jwt.Config      `mapstructure:"jwt"`
 	Database *database.Config `mapstructure:"database"`
 	Services *ConfigServices  `mapstructure:"services"`
@@ -19,30 +23,37 @@ type ConfigServices struct {
 }
 
 func LoadConfig() {
+	profile := config.Getenv("APP_ENV", "local")
+	configPath := config.Getenv("APP_CONFIG_PATH", "../../config")
+
 	config.WithOptions(config.ParseEnv)
 	config.AddDriver(yaml.Driver)
 
-	// TODO: Change the path to a ENV variable
-	err := config.LoadFiles("../../config/server.yml")
+	file := fmt.Sprintf("%s/%s.yml", configPath, profile)
+	err := config.LoadFiles(file)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func GetConfig() *Config {
+func Get() *Config {
 	cfg := &Config{}
 	config.Decode(cfg)
 	return cfg
 }
 
-func GetJWTConfig(config *Config) *jwt.Config {
+func JWT(config *Config) *jwt.Config {
 	return config.JWT
 }
 
-func GetDatabaseConfig(config *Config) *database.Config {
+func Database(config *Config) *database.Config {
 	return config.Database
 }
 
-func GetRandomConfig(config *Config) *random.Config {
+func ServicesRandom(config *Config) *random.Config {
 	return config.Services.Random
+}
+
+func Server(config *Config) *server.Config {
+	return config.Server
 }
