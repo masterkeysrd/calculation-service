@@ -13,13 +13,13 @@ server: server/help
 .PHONY: server/build
 server/build:
 	@echo "Building server..."
-	go build -o $(BIN_DIR)/server ./server.go
+	go build -o $(BIN_DIR)/server ./main.go
 
 # server/build_dev - builds the server for development.
 .PHONY: server/build_dev
 server/build_dev:
 	@echo "Building development server..."
-	go build -o $(TMP_DIR)/server ./server.go
+	go build -o $(TMP_DIR)/server ./main.go
 
 # server/start - starts the server.
 .PHONY: server/start

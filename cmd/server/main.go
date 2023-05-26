@@ -8,7 +8,10 @@ import (
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/record"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/domain/user"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/config"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/database"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/jwt"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/persistence"
+	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/random"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/validator"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/web/res/controllers"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/web/res/middleware"
@@ -34,21 +37,36 @@ func main() {
 	}
 }
 
+type RegisterProviders func(*dig.Container) error
+
 func buildContainer() *dig.Container {
 	container := dig.New()
 
-	jwt.RegisterProviders(container)
-	auth.RegisterProviders(container)
-	user.RegisterProviders(container)
-	config.RegisterProviders(container)
-	record.RegisterProviders(container)
-	server.RegisterProviders(container)
-	balance.RegisterProviders(container)
-	operation.RegisterProviders(container)
-	validator.RegisterProviders(container)
-	middleware.RegisterProviders(container)
-	calculation.RegisterProviders(container)
-	controllers.RegisterProviders(container)
+	registers := []RegisterProviders{
+		jwt.RegisterProviders,
+		auth.RegisterProviders,
+		user.RegisterProviders,
+		config.RegisterProviders,
+		record.RegisterProviders,
+		server.RegisterProviders,
+		balance.RegisterProviders,
+		operation.RegisterProviders,
+		validator.RegisterProviders,
+		middleware.RegisterProviders,
+		calculation.RegisterProviders,
+		controllers.RegisterProviders,
+		database.RegisterProviders,
+		persistence.RegisterProviders,
+		random.RegisterProviders,
+	}
+
+	for _, register := range registers {
+		err := register(container)
+
+		if err != nil {
+			panic(err)
+		}
+	}
 
 	return container
 }

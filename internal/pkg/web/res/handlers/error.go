@@ -47,21 +47,20 @@ func ParseError(e error) (int, map[string]interface{}) {
 	switch err := e.(type) {
 	case *strconv.NumError:
 		code = http.StatusBadRequest
-		response = ErrorToMap(http.StatusBadRequest, err.Error(), err)
+		response = ErrorToMap(http.StatusBadRequest, err.Error())
 	case errors.HTTPError:
 		code = err.StatusCode()
-		response = ErrorToMap(err.StatusCode(), err.Error(), err)
+		response = ErrorToMap(err.StatusCode(), err.Error())
 	default:
-		response = ErrorToMap(http.StatusInternalServerError, err.Error(), err)
+		response = ErrorToMap(http.StatusInternalServerError, err.Error())
 	}
 
 	return code, response
 }
 
-func ErrorToMap(code int, message string, details interface{}) map[string]interface{} {
+func ErrorToMap(code int, message string) map[string]interface{} {
 	return map[string]interface{}{
-		"code":             code,
-		"message":          message,
-		"message_detailed": details,
+		"code":    code,
+		"message": message,
 	}
 }

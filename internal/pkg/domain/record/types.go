@@ -26,7 +26,7 @@ type RecordResponse struct {
 	Amount        float64   `json:"amount"`
 	UserBalance   float64   `json:"userBalance"`
 	Result        string    `json:"result"`
-	CreatedAt     time.Time `json:"date"`
+	CreatedAt     time.Time `json:"createdAt"`
 }
 
 type CreateRecordRequest struct {
