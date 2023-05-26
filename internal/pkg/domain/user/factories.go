@@ -19,8 +19,7 @@ func NewUserFactory(validator *validator.Validator) UserFactory {
 			UserName: userName,
 			Password: passwordHash,
 			Balance: &UserBalance{
-				Amount:         10,
-				AmountInFlight: 0,
+				Amount: 50,
 			},
 		}
 

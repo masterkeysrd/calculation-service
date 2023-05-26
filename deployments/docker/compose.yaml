@@ -12,7 +12,8 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - ./volumes/postgres-data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres-data:/var/lib/postgresql/data
     networks:
       - calculation-system
 
@@ -25,11 +26,15 @@ services:
     ports:
       - 5050:80
     volumes:
-      - ./volumes/pgadmin-data:/var/lib/pgadmin
+      - pgadmin-data:/var/lib/pgadmin
     networks:
       - calculation-system
     depends_on:
       - database
+
+volumes:
+  postgres-data:
+  pgadmin-data:
 
 networks:
   calculation-system:

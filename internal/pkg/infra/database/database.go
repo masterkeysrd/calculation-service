@@ -2,17 +2,34 @@ package database
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"time"
 
 	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/persistence/loader"
 	"github.com/masterkeysrd/calculation-service/internal/pkg/infra/persistence/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 func NewDatabase(config *Config) *gorm.DB {
+	databaseLogger := logger.New(
+		log.New(os.Stdout, "\r\n", log.LstdFlags),
+		logger.Config{
+			SlowThreshold:             time.Second,
+			LogLevel:                  logger.Info,
+			IgnoreRecordNotFoundError: true,
+			ParameterizedQueries:      true,
+			Colorful:                  true,
+		},
+	)
+
 	dsn := createDatabaseDSN(config)
 	pg := postgres.Open(dsn)
-	database, err := gorm.Open(pg, &gorm.Config{})
+	database, err := gorm.Open(pg, &gorm.Config{
+		Logger: databaseLogger,
+	})
 
 	if err != nil {
 		panic(err)
