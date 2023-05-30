@@ -1,6 +1,8 @@
 # Makefile for the 'calculation-service' project.
 .DEFAULT_GOAL := help
 
+include tasks/api-docs.mk
+
 # init - Initialize the project.
 .PHONY: init
 init:
@@ -42,3 +44,8 @@ docker/build:
 .PHONY: deploy/docker
 deploy/docker:
 	./scripts/deploy_docker.sh
+
+.PHONY: api_docs
+api_docs:
+	@echo "Starting API documentation..."
+	$(MAKE) api_docs/help

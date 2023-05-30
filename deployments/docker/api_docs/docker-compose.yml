@@ -1,0 +1,12 @@
+version: "3.7"
+name: calculation-system-api-docs
+
+services:
+  api-docs:
+    image: swaggerapi/swagger-ui
+    ports:
+      - "8090:8080"
+    volumes:
+      - ../../../api/openapi.yml:/usr/share/nginx/html/openapi.yml
+    environment:
+      - API_URL=/openapi.yml

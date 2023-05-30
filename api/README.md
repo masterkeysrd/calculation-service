@@ -22,11 +22,18 @@ To run the API documentation locally you need to run the following command in th
 root of the project:
 
 ```bash
-make api-docs/run
+make api-docs/start
 ```
 
 > The command above will start the API documentation on port `8090` and you can
 > access it via <http://localhost:8090>
+
+To stop the API documentation you need to run the following command in the root
+of the project:
+
+```bash
+make api-docs/stop
+```
 
 Also the command `make dev/start` will start the API documentation on port `8090`.
 
