@@ -26,7 +26,7 @@ type AuthServiceParams struct {
 	UserService user.Service
 }
 
-func NewAuthService(options AuthServiceParams) Service {
+func NewService(options AuthServiceParams) Service {
 	return &authService{
 		jwtService:  options.JWTService,
 		userService: options.UserService,

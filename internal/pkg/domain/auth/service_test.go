@@ -24,7 +24,7 @@ func TestAuthService_SignUp(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var s auth.Service = auth.NewAuthService()
+			var s auth.Service = auth.NewService()
 			err := s.SignUp(tt.input)
 			if err != tt.err {
 				t.Errorf("AuthService.SignUp() error = %v, wantErr %v", err, tt.err)
@@ -93,7 +93,7 @@ func TestAuthService_SignIn(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var s auth.Service = auth.NewAuthService()
+			var s auth.Service = auth.NewService()
 			got, err := s.SignIn(tt.input)
 			if err != tt.err {
 				t.Errorf("AuthService.SignIn() error = %v, wantErr %v", err, tt.err)
@@ -139,7 +139,7 @@ func TestAuthService_RefreshToken(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var s auth.Service = auth.NewAuthService()
+			var s auth.Service = auth.NewService()
 			got, err := s.Refresh(tt.input)
 			if err != tt.err {
 				t.Errorf("AuthService.RefreshToken() error = %v, wantErr %v", err, tt.err)
@@ -179,7 +179,7 @@ func TestAuthService_SignOut(t *testing.T) {
 
 	for _, tt := range test {
 		t.Run(tt.name, func(t *testing.T) {
-			var s auth.Service = auth.NewAuthService()
+			var s auth.Service = auth.NewService()
 			err := s.SignOut(tt.input)
 			if err != tt.err {
 				t.Errorf("AuthService.SignOut() error = %v, wantErr %v", err, tt.err)
