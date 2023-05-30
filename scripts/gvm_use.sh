@@ -1,9 +1,9 @@
 #!/bin/bash/env bash
 
 # Check if gvm is installed first
-if ! [ -x "$(command -v gvm)" ]; then
-  echo "====> gvm is not installed. Please run scripts/gvm_init.sh"
-  exit 1
+if command -v gvm > /dev/null 2>&1; then
+    echo "gvm is not installed. Please install gvm and try again."
+    exit 1
 fi
 
 # Source gvm and use the correct go version and pkgset 

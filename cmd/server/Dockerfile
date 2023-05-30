@@ -3,10 +3,9 @@ WORKDIR /app
 RUN apk add --no-cache bash
 COPY ./go.mod ./go.sum ./
 COPY ./vendor ./vendor
-COPY ./Makefile ./
 COPY ./cmd/server ./cmd/server
 COPY ./internal ./internal
-COPY ./scripts ./scripts
+COPY ./scripts/build.sh ./scripts/build.sh
 RUN /bin/bash ./scripts/build.sh
 
 FROM alpine:3.18
