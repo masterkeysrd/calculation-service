@@ -26,6 +26,7 @@ paths:
       operationId: auth-v1-sign-up
       tags:
         - Authentication
+      security: []
       requestBody:
         content:
           application/json:
@@ -35,7 +36,6 @@ paths:
         "200":
           description: OK
                 
-
   /api/v1/auth/sign-in:
     post:
       summary: Sign in a user and get a JWT token
@@ -43,6 +43,7 @@ paths:
       operationId: auth-v1-sign-in
       tags:
         - Authentication
+      security: []
       requestBody:
         content:
           application/json:
@@ -57,17 +58,19 @@ paths:
                 $ref: "#/components/schemas/SignInResponse"
   /api/v1/auth/sign-out:
     post:
-      summary: Sign out a user
+      summary: Sign out a user (not implemented)
       description: Sign out a user
       operationId: auth-v1-sign-out
       tags:
         - Authentication
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: OK
   /api/v1/auth/refresh:
     post:
-      summary: Refresh JWT token
+      summary: Refresh JWT token (not implemented)
       description: Refresh JWT token
       operationId: refresh
       tags:
@@ -87,6 +90,8 @@ paths:
       operationId: getCurrentUser
       tags:
         - User
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: OK
@@ -102,6 +107,8 @@ paths:
       operationId: getAllOperations
       tags:
         - Calculation
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: OK
@@ -113,13 +120,15 @@ paths:
                   type: object
                   $ref: "#/components/schemas/Operation"
 
-  /api/v1/calculate:
+  /api/v1/calculations/calculate:
     post:
       summary: Perform calculation
       description: Perform calculation
       operationId: calculate
       tags:
         - Calculation
+      security:
+        - bearerAuth: []
       requestBody:
         content:
           application/json:
@@ -140,6 +149,8 @@ paths:
       operationId: getAllRecords
       tags:
         - Records
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: OK
@@ -217,12 +228,12 @@ components:
       type: object
       properties:
         operationId:
-          type: string
+          type: number
         arguments:
           type: array
           items:
-            type: number
-            description: Argument accepts only two numbers
+            type: string
+            description: Argument for calculation. The type of argument depends on the operation.
     CalculationResponse:
       type: object
       properties:
@@ -248,5 +259,11 @@ components:
         date:
           type: string
           format: date-time
-        
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - bearerAuth: []
         
