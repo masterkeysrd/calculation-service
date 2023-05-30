@@ -10,3 +10,13 @@ services:
       - ../../../api/openapi.yml:/usr/share/nginx/html/openapi.yml
     environment:
       - API_URL=/openapi.yml
+    networks:
+      - calculation-system-service
+
+networks:
+  default:
+    name: calculation-system-api-docs
+  calculation-system-api-docs:
+    driver: bridge
+  calculation-system-service:
+    external: true

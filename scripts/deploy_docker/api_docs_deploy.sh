@@ -1,19 +1,10 @@
 
 #!/bin/bash/env bash
 
-# Check if docker-compose is installed
-if ! command -v docker-compose > /dev/null 2>&1; then
-    echo "docker-compose is not installed. Please install docker-compose and try again."
-    exit 1
-fi
+# Check if docker is installed
+bash ./scripts/deploy_docker/check_docker.sh
 
-# Check if docker is running
-if ! docker info > /dev/null 2>&1; then
-    echo "Docker is not running. Please start docker and try again."
-    exit 1
-fi
-
-echo "===> Starting API Docs"
+echo "===> Deploying API Docs..."
 
 # Remove existing containers
 echo "Removing existing containers"

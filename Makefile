@@ -2,6 +2,7 @@
 .DEFAULT_GOAL := help
 
 include tasks/api-docs.mk
+include tasks/deploy-docker.mk
 
 # init - Initialize the project.
 .PHONY: init
@@ -40,10 +41,11 @@ start/dev:
 docker/build:
 	./scripts/docker_build.sh
 
-# deploy/docker - Deploy the project to Docker.
-.PHONY: deploy/docker
-deploy/docker:
-	./scripts/deploy_docker.sh
+# docker_deploy - Display help for docker deployments.
+.PHONY: deploy_docker
+deploy_docker:
+	$(MAKE) deploy_docker/help
+
 
 .PHONY: api_docs
 api_docs:

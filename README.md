@@ -56,6 +56,14 @@ cd calculation-service
 make start_dev
 ```
 
+## Architecture
+
+The architecture documentation is info [here](./docs/architecture/README.md).
+
 ## API Documentation
 
 The API documentation is info [here](./api/README.md).
+
+## Deployments
+
+The deployment documentation is info [here](./deployments/README.md).
