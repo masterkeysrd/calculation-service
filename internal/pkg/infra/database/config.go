@@ -5,5 +5,5 @@ type Config struct {
 	Port     string `mapstructure:"port"`
 	User     string `mapstructure:"username"`
 	Password string `mapstructure:"password"`
-	DBName   string `mapstructure:"name"`
+	Name     string `mapstructure:"name"`
 }

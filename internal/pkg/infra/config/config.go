@@ -24,7 +24,7 @@ type ConfigServices struct {
 
 func LoadConfig() {
 	profile := config.Getenv("APP_ENV", "local")
-	configPath := config.Getenv("APP_CONFIG_PATH", "../../config")
+	configPath := config.Getenv("APP_CONFIG_PATH", "./config")
 
 	config.WithOptions(config.ParseEnv)
 	config.AddDriver(yaml.Driver)

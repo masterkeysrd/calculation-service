@@ -1,0 +1,30 @@
+application:
+  name: "calculation-service"
+  version: "1.0.0"
+  profile: "dev"
+
+server:
+  mode: "debug"
+  port: ${PORT} # The PORT environment variable set by Orchestrator
+
+# Database configurations
+database:
+  host: ${DATABASE_HOST}
+  port: ${DATABASE_PORT}
+  name: ${DATABASE_NAME}
+  username: ${DATABASE_USERNAME}
+  password: ${DATABASE_PASSWORD}
+
+# JWT configuration
+# The values below are expressed in seconds
+jwt:
+  issuer: "calculation-service"
+  audience: "calculation-service"
+  secretKey: ${JWT_SECRET_KEY}
+  accessTokenTTL: 3600
+  refreshTokenTTL: 3600
+
+services:
+  random:
+    url: https://api.random.org/json-rpc/4/invoke
+    apiKey: ${RANDOM_ORG_API_KEY}

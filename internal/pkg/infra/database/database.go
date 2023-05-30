@@ -49,5 +49,5 @@ func NewDatabase(config *Config) *gorm.DB {
 }
 
 func createDatabaseDSN(config *Config) string {
-	return fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable", config.Host, config.Port, config.User, config.DBName, config.Password)
+	return fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable", config.Host, config.Port, config.User, config.Name, config.Password)
 }
